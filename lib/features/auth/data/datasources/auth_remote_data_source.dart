@@ -15,4 +15,7 @@ abstract class AuthRemoteDataSource {
 
   /// Calls the Supabase Auth API to terminate the active token session.
   Future<void> signOut();
+
+  /// Retrieves the active current user session from the local Supabase cache.
+  Future<AppUserModel?> getCurrentUser();
 }

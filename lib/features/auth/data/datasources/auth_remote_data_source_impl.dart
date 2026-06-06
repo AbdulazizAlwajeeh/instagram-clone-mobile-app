@@ -54,4 +54,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> signOut() async {
     await supabaseClient.auth.signOut();
   }
+
+  @override
+  Future<AppUserModel?> getCurrentUser() async {
+    final sessionUser = supabaseClient.auth.currentUser;
+    if (sessionUser == null) return null;
+
+    return AppUserModel.fromJson({
+      'id': sessionUser.id,
+      'email': sessionUser.email ?? '',
+    });
+  }
 }
