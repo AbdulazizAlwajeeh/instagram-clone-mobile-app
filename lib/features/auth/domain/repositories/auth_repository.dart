@@ -10,6 +10,7 @@ abstract class AuthRepository {
   Future<Either<Failure, AppUser>> signUpWithEmailPassword({
     required String email,
     required String password,
+    required String username,
   });
 
   /// Authenticates an existing user via credentials.

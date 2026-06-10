@@ -32,7 +32,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   Future<void> _onSignUp(AuthSignUp event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
     final result = await _userSignUp(
-      SignUpParams(email: event.email, password: event.password),
+      SignUpParams(
+        email: event.email,
+        password: event.password,
+        username: event.username,
+      ),
     );
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),

@@ -4,6 +4,7 @@ class AppUserModel extends AppUser {
   const AppUserModel({
     required super.id,
     required super.email,
+    required super.username,
   });
 
   /// Factory constructor to convert raw Supabase database/auth maps into AppUserModel.
@@ -11,14 +12,12 @@ class AppUserModel extends AppUser {
     return AppUserModel(
       id: json['id'] as String,
       email: json['email'] as String? ?? '',
+      username: json['user_metadata']?['username'] ?? '',
     );
   }
 
   /// Converts our model data back into a JSON map for database operations if needed.
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'email': email,
-    };
+    return {'id': id, 'email': email, 'username': username};
   }
 }

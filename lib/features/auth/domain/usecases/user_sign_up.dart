@@ -14,6 +14,7 @@ class UserSignUp implements UseCase<AppUser, SignUpParams> {
     return await repository.signUpWithEmailPassword(
       email: params.email,
       password: params.password,
+      username: params.username,
     );
   }
 }
@@ -21,9 +22,11 @@ class UserSignUp implements UseCase<AppUser, SignUpParams> {
 class SignUpParams {
   final String email;
   final String password;
+  final String username;
 
   const SignUpParams({
     required this.email,
     required this.password,
+    required this.username,
   });
 }

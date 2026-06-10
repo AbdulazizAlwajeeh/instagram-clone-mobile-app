@@ -5,6 +5,7 @@ abstract class AuthRemoteDataSource {
   Future<AppUserModel> signUpWithEmailPassword({
     required String email,
     required String password,
+    required String username,
   });
 
   /// Calls the Supabase Auth API to sign in using email and password credentials.

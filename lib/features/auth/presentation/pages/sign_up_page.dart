@@ -33,8 +33,7 @@ class _SignUpPageState extends State<SignUpPage> {
         AuthSignUp(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
-          //TODO:name: _usernameController.text.trim(), // Injected clean name
-          // metadata
+          username: _usernameController.text.trim(),
         ),
       );
     }
@@ -58,7 +57,9 @@ class _SignUpPageState extends State<SignUpPage> {
               }
               if (state is AuthSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Account created for ${state.user.email}!')),
+                  SnackBar(
+                    content: Text('Account created for ${state.user.email}!'),
+                  ),
                 );
               }
             },
@@ -88,7 +89,8 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       keyboardType: TextInputType.text,
                       enabled: !isLoading,
-                      validator: (value) => (value == null || value.trim().isEmpty)
+                      validator: (value) =>
+                          (value == null || value.trim().isEmpty)
                           ? 'Username cannot be empty'
                           : null,
                     ),
@@ -102,7 +104,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       keyboardType: TextInputType.emailAddress,
                       enabled: !isLoading,
                       validator: (value) =>
-                      (value == null || !value.contains('@'))
+                          (value == null || !value.contains('@'))
                           ? 'Enter a valid email'
                           : null,
                     ),
@@ -127,10 +129,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       ),
                       child: isLoading
                           ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
                           : const Text('Sign Up'),
                     ),
                     const SizedBox(height: 16),
@@ -138,8 +140,10 @@ class _SignUpPageState extends State<SignUpPage> {
                       onPressed: isLoading
                           ? null
                           : () {
-                        context.go(AppRouter.signInPath); // Return to login layout cleanly
-                      },
+                              context.go(
+                                AppRouter.signInPath,
+                              ); // Return to login layout cleanly
+                            },
                       child: const Text("Already have an account? Log In"),
                     ),
                   ],

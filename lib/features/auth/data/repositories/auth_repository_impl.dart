@@ -14,11 +14,13 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, AppUser>> signUpWithEmailPassword({
     required String email,
     required String password,
+    required String username,
   }) async {
     try {
       final userModel = await remoteDataSource.signUpWithEmailPassword(
         email: email,
         password: password,
+        username: username,
       );
       return right(userModel);
     } on supabase.AuthException catch (e) {
