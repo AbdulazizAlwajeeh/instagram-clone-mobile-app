@@ -42,6 +42,7 @@ dependencies:
   flutter_bloc: ^8.1.3
   # Service Locator for Dependency Injection
   get_it: ^7.6.0
+  go_router: ^14.0.0
 
 dev_dependencies:
   flutter_test:

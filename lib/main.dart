@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:yemengram/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:yemengram/core/router/app_router.dart';
 import 'package:yemengram/init_dependencies.dart';
 
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -40,10 +40,10 @@ class MyApp extends StatelessWidget {
           create: (_) => serviceLocator<AuthBloc>()..add(AuthCheckSession()),
         ),
       ],
-      child: const MaterialApp(
+      child: MaterialApp.router(
         title: 'Instagram Clone',
         debugShowCheckedModeBanner: false,
-        home: SignInPage(),
+        routerConfig: AppRouter.router,
       ),
     );
   }
