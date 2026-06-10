@@ -58,7 +58,7 @@ class _SignUpPageState extends State<SignUpPage> {
               if (state is AuthSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Account created for ${state.user.email}!'),
+                    content: Text('Now confirm your email!'),
                   ),
                 );
               }

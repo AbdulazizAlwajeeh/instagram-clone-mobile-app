@@ -14,7 +14,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String username,
   }) async {
     try {
-      // 1. Single atomic signup call. We pass the username into the raw metadata map
+      // 1. Call our dedicated RPC function to safely check availability
+      //  without table access
+      final bool isAvailable = await supabaseClient.rpc(
+        'check_username_available',
+        params: {'requested_username': username.trim()},
+      );
+
+      if (!isAvailable) {
+        throw const AuthException('This username is already taken.');
+      }
+
+      // 2. Single atomic signup call. We pass the username into the raw
+      // metadata map
       final response = await supabaseClient.auth.signUp(
         email: email,
         password: password,
@@ -27,20 +39,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         );
       }
 
-      // 2. Return the clean model. The server trigger has already created the profile row!
-      return AppUserModel.fromJson({
-        'id': response.user!.id,
-        'email': response.user!.email ?? '',
-        'username': username,
-      });
-    } on AuthException catch (e) {
-      // If our SQL trigger throws the exception, the Supabase Auth layer passes it back here
-      if (e.message.contains('already taken') || e.statusCode == '23505') {
-        throw const AuthException(
-          'This username is already taken. Please choose another.',
-        );
+      // 3. CHECK FOR HIDDEN EMAIL COLLISION:
+      // If the response succeeds but the identities list is completely empty,
+      // Supabase is hiding a duplicate email registration attempt.
+      if (response.user!.identities != null &&
+          response.user!.identities!.isEmpty) {
+        throw const AuthException('This email is already registered.');
       }
-      throw AuthException(e.message);
+
+      // 4. Return the mapped user model if everything passes safely
+      return AppUserModel.fromJson(response.user!.toJson());
+    } on AuthException {
+      // Pass known auth errors straight up to the repository layer
+      rethrow;
+    } catch (e) {
+      // Wrap any other low-level network or system errors safely
+      throw Exception(e.toString());
     }
   }
 
