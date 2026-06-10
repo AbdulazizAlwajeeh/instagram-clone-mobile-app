@@ -11,21 +11,37 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<AppUserModel> signUpWithEmailPassword({
     required String email,
     required String password,
+    required String username,
   }) async {
-    final response = await supabaseClient.auth.signUp(
-      email: email,
-      password: password,
-    );
+    try {
+      // 1. Single atomic signup call. We pass the username into the raw metadata map
+      final response = await supabaseClient.auth.signUp(
+        email: email,
+        password: password,
+        data: {'username': username},
+      );
 
-    if (response.user == null) {
-      throw const AuthException('Sign up failed: User payload returned null.');
+      if (response.user == null) {
+        throw const AuthException(
+          'Sign up failed: User payload returned null.',
+        );
+      }
+
+      // 2. Return the clean model. The server trigger has already created the profile row!
+      return AppUserModel.fromJson({
+        'id': response.user!.id,
+        'email': response.user!.email ?? '',
+        'username': username,
+      });
+    } on AuthException catch (e) {
+      // If our SQL trigger throws the exception, the Supabase Auth layer passes it back here
+      if (e.message.contains('already taken') || e.statusCode == '23505') {
+        throw const AuthException(
+          'This username is already taken. Please choose another.',
+        );
+      }
+      throw AuthException(e.message);
     }
-
-    // Map the Supabase SDK User object cleanly to our local Data Model layout
-    return AppUserModel.fromJson({
-      'id': response.user!.id,
-      'email': response.user!.email ?? '',
-    });
   }
 
   @override
@@ -44,9 +60,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
     }
 
+    // Pull the associated unique username on login from the profiles table
+    final profileData = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('id', response.user!.id)
+        .single();
+
     return AppUserModel.fromJson({
       'id': response.user!.id,
       'email': response.user!.email ?? '',
+      'username': profileData['username'] ?? '',
     });
   }
 
@@ -60,9 +84,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final sessionUser = supabaseClient.auth.currentUser;
     if (sessionUser == null) return null;
 
+    // Restore user unique username along with cache credentials checkout
+    final profileData = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('id', sessionUser.id)
+        .single();
+
     return AppUserModel.fromJson({
       'id': sessionUser.id,
       'email': sessionUser.email ?? '',
+      'username': profileData['username'] ?? '',
     });
   }
 }
