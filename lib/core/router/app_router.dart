@@ -1,6 +1,8 @@
 import 'package:go_router/go_router.dart';
 import 'package:yemengram/features/auth/presentation/pages/sign_in_page.dart';
 
+import '../../features/auth/presentation/pages/sign_up_page.dart';
+
 class AppRouter {
   // Centralized route name constants to prevent typos across the app
   static const String signInPath = '/sign-in';
@@ -13,6 +15,10 @@ class AppRouter {
       GoRoute(
         path: signInPath,
         builder: (context, state) => const SignInPage(),
+      ),
+      GoRoute(
+        path: signUpPath,
+        builder: (context, state) => const SignUpPage(),
       ),
     ],
   );

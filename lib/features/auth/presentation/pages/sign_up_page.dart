@@ -1,36 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/router/app_router.dart';
+import 'package:yemengram/core/router/app_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
 
-class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+class SignUpPage extends StatefulWidget {
+  const SignUpPage({super.key});
 
   @override
-  State<SignInPage> createState() => _SignInPageState();
+  State<SignUpPage> createState() => _SignUpPageState();
 }
 
-class _SignInPageState extends State<SignInPage> {
+class _SignUpPageState extends State<SignUpPage> {
   final _formKey = GlobalKey<FormState>();
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _handleSignIn() {
+  void _handleSignUp() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-        AuthSignIn(
+        AuthSignUp(
           email: _emailController.text.trim(),
           password: _passwordController.text.trim(),
+          //TODO:name: _usernameController.text.trim(), // Injected clean name
+          // metadata
         ),
       );
     }
@@ -54,9 +58,8 @@ class _SignInPageState extends State<SignInPage> {
               }
               if (state is AuthSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Welcome back, ${state.user.email}!')),
+                  SnackBar(content: Text('Account created for ${state.user.email}!')),
                 );
-                // Proactive routing logic hook to home feed will go here later
               }
             },
             builder: (context, state) {
@@ -78,6 +81,19 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                     const SizedBox(height: 40),
                     TextFormField(
+                      controller: _usernameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Username',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.text,
+                      enabled: !isLoading,
+                      validator: (value) => (value == null || value.trim().isEmpty)
+                          ? 'Username cannot be empty'
+                          : null,
+                    ),
+                    const SizedBox(height: 16),
+                    TextFormField(
                       controller: _emailController,
                       decoration: const InputDecoration(
                         labelText: 'Email',
@@ -86,7 +102,7 @@ class _SignInPageState extends State<SignInPage> {
                       keyboardType: TextInputType.emailAddress,
                       enabled: !isLoading,
                       validator: (value) =>
-                          (value == null || !value.contains('@'))
+                      (value == null || !value.contains('@'))
                           ? 'Enter a valid email'
                           : null,
                     ),
@@ -105,26 +121,26 @@ class _SignInPageState extends State<SignInPage> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: isLoading ? null : _handleSignIn,
+                      onPressed: isLoading ? null : _handleSignUp,
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: isLoading
                           ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Log In'),
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                          : const Text('Sign Up'),
                     ),
                     const SizedBox(height: 16),
                     TextButton(
                       onPressed: isLoading
                           ? null
                           : () {
-                              context.go(AppRouter.signUpPath);
-                            },
-                      child: const Text("Don't have an account? Sign Up"),
+                        context.go(AppRouter.signInPath); // Return to login layout cleanly
+                      },
+                      child: const Text("Already have an account? Log In"),
                     ),
                   ],
                 ),
