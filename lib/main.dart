@@ -1,21 +1,18 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yemengram/features/auth/presentation/pages/sign_in_page.dart';
+import 'package:yemengram/init_dependencies.dart';
+
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_event.dart';
 
 void main() async {
   // Required by the framework to perform asynchronous initializations before rendering UI
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-    // 1. Load localized environment asset values
-    await dotenv.load(fileName: ".env");
-
-    // 2. Safely initialize global Supabase client instances
-    await Supabase.initialize(
-      url: dotenv.get('SUPABASE_URL'),
-      publishableKey: dotenv.get('SUPABASE_ANON_KEY'),
-    );
+    await initDependencies();
 
     // Optional: Log successful startup flow only while building locally
     if (kDebugMode) {
@@ -37,16 +34,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Instagram Clone',
-      debugShowCheckedModeBanner: false,
-      home: const Scaffold(
-        body: Center(
-          child: Text(
-            'App Skeleton Ready.',
-            style: TextStyle(fontSize: 16, letterSpacing: 0.5),
-          ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthBloc>(
+          create: (_) => serviceLocator<AuthBloc>()..add(AuthCheckSession()),
         ),
+      ],
+      child: const MaterialApp(
+        title: 'Instagram Clone',
+        debugShowCheckedModeBanner: false,
+        home: SignInPage(),
       ),
     );
   }
