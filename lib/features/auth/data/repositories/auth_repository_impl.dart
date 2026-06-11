@@ -1,5 +1,5 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -23,7 +23,7 @@ class AuthRepositoryImpl implements AuthRepository {
         username: username,
       );
       return right(userModel);
-    } on supabase.AuthException catch (e) {
+    } on ServerException catch (e) {
       return left(AuthFailure(e.message));
     } catch (e) {
       return left(ServerFailure(e.toString()));
@@ -41,7 +41,7 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       return right(userModel);
-    } on supabase.AuthException catch (e) {
+    } on ServerException catch (e) {
       return left(AuthFailure(e.message));
     } catch (e) {
       return left(ServerFailure(e.toString()));
@@ -53,7 +53,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await remoteDataSource.signOut();
       return right(null);
-    } on supabase.AuthException catch (e) {
+    } on ServerException catch (e) {
       return left(AuthFailure(e.message));
     } catch (e) {
       return left(ServerFailure(e.toString()));
@@ -65,7 +65,7 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       final userModel = await remoteDataSource.getCurrentUser();
       return right(userModel);
-    } on supabase.AuthException catch (e) {
+    } on ServerException catch (e) {
       return left(AuthFailure(e.message));
     } catch (e) {
       return left(ServerFailure(e.toString()));

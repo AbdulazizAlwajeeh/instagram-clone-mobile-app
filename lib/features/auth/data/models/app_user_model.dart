@@ -12,7 +12,10 @@ class AppUserModel extends AppUser {
     return AppUserModel(
       id: json['id'] as String,
       email: json['email'] as String? ?? '',
-      username: json['user_metadata']?['username'] ?? '',
+      username:
+          json['username'] as String? ??
+          json['user_metadata']?['username'] as String? ??
+          '',
     );
   }
 

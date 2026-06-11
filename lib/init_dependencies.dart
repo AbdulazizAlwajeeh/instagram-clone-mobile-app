@@ -34,7 +34,7 @@ void _initAuth() {
   serviceLocator
     // Data Source
     ..registerFactory<AuthRemoteDataSource>(
-      () => AuthRemoteDataSourceImpl(serviceLocator()),
+      () => AuthRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
     )
     // Repository
     ..registerFactory<AuthRepository>(
