@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:yemengram/features/auth/presentation/bloc/auth_state.dart';
 import 'package:yemengram/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:yemengram/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:yemengram/core/presentation/pages/main_layout.dart';
@@ -8,8 +11,13 @@ import 'package:yemengram/features/search/presentation/pages/search_page.dart';
 import 'package:yemengram/features/post/presentation/pages/post_page.dart';
 import 'package:yemengram/features/chat/presentation/pages/chat_page.dart';
 import 'package:yemengram/features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/pages/settings_page.dart';
 
 class AppRouter {
+  final AuthBloc _authBloc;
+
+  AppRouter({required AuthBloc authBloc}) : _authBloc = authBloc;
+
   // Centralized route name constants to prevent typos across the app
   static const String signInPath = '/sign-in';
   static const String signUpPath = '/sign-up';
@@ -21,14 +29,26 @@ class AppRouter {
   static const String chatPath = '/chat';
   static const String profilePath = '/profile';
 
+  // Sub-route path constants
+  static const String settingsPath =
+      'settings'; // Relative path (No leading slash)
+  static const String settingsFullPath =
+      '/profile/settings'; // Full path for navigation calls
+
   // Root navigator key for global context operations if needed
   static final GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>();
 
-  static final GoRouter router = GoRouter(
+  late final router = GoRouter(
     navigatorKey: rootNavigatorKey,
     // The initial path the application opens to on launch
     initialLocation: signInPath,
+    refreshListenable: GoRouterRefreshStream(_authBloc.stream),
+    redirect: (BuildContext context, GoRouterState state) {
+      final loggedIn = _authBloc.state is AuthSuccess;
+
+      return loggedIn ? null : signInPath;
+    },
     routes: [
       GoRoute(
         path: signInPath,
@@ -80,6 +100,14 @@ class AppRouter {
               GoRoute(
                 path: profilePath,
                 builder: (context, state) => const ProfilePage(),
+                routes: [
+                  // --- Sub-Route: Settings ---
+                  // Declared as a child of profile so it stays inside the profile tab shell
+                  GoRoute(
+                    path: settingsPath,
+                    builder: (context, state) => const SettingsPage(),
+                  ),
+                ],
               ),
             ],
           ),
@@ -87,4 +115,21 @@ class AppRouter {
       ),
     ],
   );
+
+  GoRouter get config => router;
+}
+
+class GoRouterRefreshStream extends ChangeNotifier {
+  late final StreamSubscription<dynamic> _subscription;
+
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 }
