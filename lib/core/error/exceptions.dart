@@ -3,3 +3,11 @@ class ServerException implements Exception {
 
   const ServerException(this.message);
 }
+
+class CacheException implements Exception {
+  final String message;
+
+  const CacheException([
+    this.message = 'A local storage cache error occurred.',
+  ]);
+}

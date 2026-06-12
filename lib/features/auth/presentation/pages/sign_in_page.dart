@@ -54,9 +54,11 @@ class _SignInPageState extends State<SignInPage> {
               }
               if (state is AuthSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Welcome back, ${state.user.email}!')),
+                  SnackBar(
+                    content: Text('Welcome back, ${state.user.username}!'),
+                  ),
                 );
-                // Proactive routing logic hook to home feed will go here later
+                context.go(AppRouter.feedPath);
               }
             },
             builder: (context, state) {

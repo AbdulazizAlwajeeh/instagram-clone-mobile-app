@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:yemengram/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:yemengram/features/auth/data/datasources/auth_remote_data_source_impl.dart';
@@ -10,24 +11,58 @@ import 'package:yemengram/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:yemengram/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:yemengram/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
+import 'core/router/app_router.dart';
+import 'core/theme/data/datasources/theme_local_data_source.dart';
+import 'core/theme/data/datasources/theme_local_data_source_impl.dart';
+import 'core/theme/data/repositories/theme_repository_impl.dart';
+import 'core/theme/domain/repositories/theme_repository.dart';
+import 'core/theme/presentation/bloc/theme_bloc.dart';
 
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
-  // 1. Load localized environment configuration variables
+  // 1. Initialize local key-value storage engine synchronously
+  final sharedPreferences = await SharedPreferences.getInstance();
+  serviceLocator.registerSingleton<SharedPreferences>(sharedPreferences);
+
+  // 2. Load localized environment configuration variables
   await dotenv.load(fileName: ".env");
 
-  // 2. Initialize Supabase instance using loaded configuration
+  // 3. Initialize Supabase instance using loaded configuration
   final supabase = await Supabase.initialize(
     url: dotenv.get('SUPABASE_URL'),
     publishableKey: dotenv.get('SUPABASE_ANON_KEY'),
   );
 
-  // 3. Register global Supabase client singleton
+  // 4. Register global Supabase client singleton
   serviceLocator.registerLazySingleton(() => supabase.client);
 
-  // 4. Initialize Auth Feature dependencies
+  // 5. Initialize Core Theme engine dependencies
+  _initTheme();
+
+  // 6. Initialize Auth Feature dependencies
   _initAuth();
+
+  // 7. Register Global Core Router Singleton
+  serviceLocator.registerSingleton<AppRouter>(
+    AppRouter(authBloc: serviceLocator<AuthBloc>()),
+  );
+}
+
+void _initTheme() {
+  serviceLocator
+    // Data Source
+    ..registerFactory<ThemeLocalDataSource>(
+      () => ThemeLocalDataSourceImpl(sharedPreferences: serviceLocator()),
+    )
+    // Repository
+    ..registerFactory<ThemeRepository>(
+      () => ThemeRepositoryImpl(localDataSource: serviceLocator()),
+    )
+    // Bloc (Registered as Singleton to protect the core visual stream state)
+    ..registerSingleton<ThemeBloc>(
+      ThemeBloc(themeRepository: serviceLocator()),
+    );
 }
 
 void _initAuth() {

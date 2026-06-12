@@ -2,8 +2,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:yemengram/core/router/app_router.dart';
+import 'package:yemengram/core/theme/app_theme.dart';
+import 'package:yemengram/core/theme/presentation/bloc/theme_state.dart';
 import 'package:yemengram/init_dependencies.dart';
 
+import 'core/theme/presentation/bloc/theme_bloc.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 
@@ -36,14 +39,22 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<ThemeBloc>(create: (_) => serviceLocator<ThemeBloc>()),
         BlocProvider<AuthBloc>(
           create: (_) => serviceLocator<AuthBloc>()..add(AuthCheckSession()),
         ),
       ],
-      child: MaterialApp.router(
-        title: 'Instagram Clone',
-        debugShowCheckedModeBanner: false,
-        routerConfig: AppRouter.router,
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp.router(
+            title: 'Instagram Clone',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: state.themeMode,
+            routerConfig: serviceLocator<AppRouter>().config,
+          );
+        },
       ),
     );
   }

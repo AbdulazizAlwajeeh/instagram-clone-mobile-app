@@ -13,3 +13,9 @@ class ServerFailure extends Failure {
 class AuthFailure extends Failure {
   const AuthFailure([super.message]);
 }
+
+class CacheFailure extends Failure {
+  const CacheFailure([
+    super.message = 'Local storage caching operation failed.',
+  ]);
+}

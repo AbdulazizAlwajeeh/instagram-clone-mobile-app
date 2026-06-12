@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_dimensions.dart';
+import '../../../../core/theme/presentation/bloc/theme_bloc.dart';
+import '../../../../core/theme/presentation/bloc/theme_event.dart';
 import '../../../../core/theme/theme_extensions.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
@@ -44,7 +46,11 @@ class SettingsPage extends StatelessWidget {
                   title: Text('Dark Theme', style: context.textTheme.bodyLarge),
                   trailing: Switch.adaptive(
                     value: context.theme.brightness == Brightness.dark,
-                    onChanged: (bool value) {},
+                    onChanged: (bool value) {
+                      context.read<ThemeBloc>().add(
+                        const ThemeToggleRequested(),
+                      );
+                    },
                   ),
                 ),
               ),
