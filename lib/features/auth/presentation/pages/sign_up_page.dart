@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yemengram/core/router/app_router.dart';
+import 'package:yemengram/features/auth/presentation/widgets/auth_header.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../widgets/auth_action.dart';
+import '../widgets/auth_text_field.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -57,9 +60,7 @@ class _SignUpPageState extends State<SignUpPage> {
               }
               if (state is AuthSuccess) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Now confirm your email!'),
-                  ),
+                  SnackBar(content: Text('Now confirm your email!')),
                 );
               }
             },
@@ -72,21 +73,11 @@ class _SignUpPageState extends State<SignUpPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Instagram',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    const AuthHeader(),
                     const SizedBox(height: 40),
-                    TextFormField(
+                    AuthTextField(
                       controller: _usernameController,
-                      decoration: const InputDecoration(
-                        labelText: 'Username',
-                        border: OutlineInputBorder(),
-                      ),
+                      labelText: 'Username',
                       keyboardType: TextInputType.text,
                       enabled: !isLoading,
                       validator: (value) =>
@@ -95,12 +86,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           : null,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    AuthTextField(
                       controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
-                      ),
+                      labelText: 'Email',
                       keyboardType: TextInputType.emailAddress,
                       enabled: !isLoading,
                       validator: (value) =>
@@ -109,12 +97,9 @@ class _SignUpPageState extends State<SignUpPage> {
                           : null,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    AuthTextField(
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
-                      ),
+                      labelText: 'Password',
                       obscureText: true,
                       enabled: !isLoading,
                       validator: (value) => (value == null || value.length < 6)
@@ -122,29 +107,14 @@ class _SignUpPageState extends State<SignUpPage> {
                           : null,
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: isLoading ? null : _handleSignUp,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Sign Up'),
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                              context.go(
-                                AppRouter.signInPath,
-                              ); // Return to login layout cleanly
-                            },
-                      child: const Text("Already have an account? Log In"),
+                    AuthActionBlock(
+                      primaryButtonText: 'Sign Up',
+                      secondaryButtonText: 'Already have an account? Log In',
+                      isLoading: isLoading,
+                      onPrimaryPressed: _handleSignUp,
+                      onSecondaryPressed: () {
+                        context.go(AppRouter.signInPath);
+                      },
                     ),
                   ],
                 ),
