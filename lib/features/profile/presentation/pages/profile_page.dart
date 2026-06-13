@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/theme_extensions.dart';
+import '../widgets/profile_header_section.dart';
+import '../widgets/profile_post_grid.dart';
+import '../widgets/profile_tab_delegate.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -22,13 +24,17 @@ class ProfilePage extends StatelessWidget {
           ),
         ],
       ),
-      body: SafeArea(
-        child: Center(
-          child: Text(
-            'User Profile Screen Stub',
-            style: context.textTheme.bodyLarge,
-          ),
-        ),
+      body: CustomScrollView(
+        slivers: [
+          // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
+          const SliverToBoxAdapter(child: ProfileHeaderSection()),
+
+          // 2. Pinned Layout Tab Bar
+          SliverPersistentHeader(pinned: true, delegate: ProfileTabDelegate()),
+
+          // 3. Aspect-Locked Post Grid Stub
+          const ProfilePostGrid(),
+        ],
       ),
     );
   }
