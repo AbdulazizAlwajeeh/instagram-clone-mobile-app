@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/features/auth/presentation/widgets/auth_header.dart';
 import '../../../../core/router/app_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../widgets/auth_action.dart';
+import '../widgets/auth_text_field.dart';
 
 class SignInPage extends StatefulWidget {
   const SignInPage({super.key});
@@ -70,21 +73,11 @@ class _SignInPageState extends State<SignInPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Text(
-                      'Instagram',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 42,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                    const AuthHeader(),
                     const SizedBox(height: 40),
-                    TextFormField(
+                    AuthTextField(
                       controller: _emailController,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        border: OutlineInputBorder(),
-                      ),
+                      labelText: 'Email',
                       keyboardType: TextInputType.emailAddress,
                       enabled: !isLoading,
                       validator: (value) =>
@@ -93,12 +86,9 @@ class _SignInPageState extends State<SignInPage> {
                           : null,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    AuthTextField(
                       controller: _passwordController,
-                      decoration: const InputDecoration(
-                        labelText: 'Password',
-                        border: OutlineInputBorder(),
-                      ),
+                      labelText: 'Password',
                       obscureText: true,
                       enabled: !isLoading,
                       validator: (value) => (value == null || value.length < 6)
@@ -106,27 +96,14 @@ class _SignInPageState extends State<SignInPage> {
                           : null,
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: isLoading ? null : _handleSignIn,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: isLoading
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Log In'),
-                    ),
-                    const SizedBox(height: 16),
-                    TextButton(
-                      onPressed: isLoading
-                          ? null
-                          : () {
-                              context.go(AppRouter.signUpPath);
-                            },
-                      child: const Text("Don't have an account? Sign Up"),
+                    AuthActionBlock(
+                      primaryButtonText: 'Log In',
+                      secondaryButtonText: "Don't have an account? Sign Up",
+                      isLoading: isLoading,
+                      onPrimaryPressed: _handleSignIn,
+                      onSecondaryPressed: () {
+                        context.go(AppRouter.signUpPath);
+                      },
                     ),
                   ],
                 ),
