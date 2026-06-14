@@ -1,4 +1,6 @@
-import '../../domain/entities/app_user.dart';
+
+
+import '../../../../core/app_user/domain/entities/app_user.dart';
 
 class AppUserModel extends AppUser {
   const AppUserModel({

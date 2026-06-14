@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/usecase/usecase.dart';
-import '../entities/app_user.dart';
+import '../../../../core/app_user/domain/entities/app_user.dart';
 import '../repositories/auth_repository.dart';
 
 class GetCurrentUser implements UseCase<AppUser?, NoParams> {

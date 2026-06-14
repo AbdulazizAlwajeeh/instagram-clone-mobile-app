@@ -11,6 +11,7 @@ import 'package:yemengram/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:yemengram/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:yemengram/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
+import 'core/app_user/presentation/cubit/current_user_cubit.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/data/datasources/theme_local_data_source.dart';
 import 'core/theme/data/datasources/theme_local_data_source_impl.dart';
@@ -21,29 +22,32 @@ import 'core/theme/presentation/bloc/theme_bloc.dart';
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
-  // 1. Initialize local key-value storage engine synchronously
+  // Initialize local key-value storage engine synchronously
   final sharedPreferences = await SharedPreferences.getInstance();
   serviceLocator.registerSingleton<SharedPreferences>(sharedPreferences);
 
-  // 2. Load localized environment configuration variables
+  // Load localized environment configuration variables
   await dotenv.load(fileName: ".env");
 
-  // 3. Initialize Supabase instance using loaded configuration
+  // Initialize Supabase instance using loaded configuration
   final supabase = await Supabase.initialize(
     url: dotenv.get('SUPABASE_URL'),
     publishableKey: dotenv.get('SUPABASE_ANON_KEY'),
   );
 
-  // 4. Register global Supabase client singleton
+  // Register global Supabase client singleton
   serviceLocator.registerLazySingleton(() => supabase.client);
 
-  // 5. Initialize Core Theme engine dependencies
+  // Initialize Global Core User Session tracking state machine
+  serviceLocator.registerLazySingleton(() => CurrentUserCubit());
+
+  // Initialize Core Theme engine dependencies
   _initTheme();
 
-  // 6. Initialize Auth Feature dependencies
+  // Initialize Auth Feature dependencies
   _initAuth();
 
-  // 7. Register Global Core Router Singleton
+  // Register Global Core Router Singleton
   serviceLocator.registerSingleton<AppRouter>(
     AppRouter(authBloc: serviceLocator<AuthBloc>()),
   );
@@ -87,6 +91,7 @@ void _initAuth() {
         userSignIn: serviceLocator(),
         getCurrentUser: serviceLocator(),
         userSignOut: serviceLocator(),
+        currentUserCubit: serviceLocator(),
       ),
     );
 }

@@ -5,7 +5,7 @@ import 'package:yemengram/core/router/app_router.dart';
 import 'package:yemengram/core/theme/app_theme.dart';
 import 'package:yemengram/core/theme/presentation/bloc/theme_state.dart';
 import 'package:yemengram/init_dependencies.dart';
-
+import 'core/app_user/presentation/cubit/current_user_cubit.dart';
 import 'core/theme/presentation/bloc/theme_bloc.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
@@ -39,6 +39,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        BlocProvider<CurrentUserCubit>(
+          create: (_) => serviceLocator<CurrentUserCubit>(),
+        ),
         BlocProvider<ThemeBloc>(create: (_) => serviceLocator<ThemeBloc>()),
         BlocProvider<AuthBloc>(
           create: (_) => serviceLocator<AuthBloc>()..add(AuthCheckSession()),

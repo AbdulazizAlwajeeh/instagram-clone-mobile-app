@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/app_user/presentation/cubit/current_user_cubit.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/user_sign_in.dart';
 import '../../domain/usecases/user_sign_out.dart';
@@ -12,16 +13,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final UserSignIn _userSignIn;
   final GetCurrentUser _getCurrentUser;
   final UserSignOut _userSignOut;
+  final CurrentUserCubit _currentUserCubit;
 
   AuthBloc({
     required UserSignUp userSignUp,
     required UserSignIn userSignIn,
     required GetCurrentUser getCurrentUser,
     required UserSignOut userSignOut,
+    required CurrentUserCubit currentUserCubit,
   }) : _userSignUp = userSignUp,
        _userSignIn = userSignIn,
        _getCurrentUser = getCurrentUser,
        _userSignOut = userSignOut,
+       _currentUserCubit = currentUserCubit,
        super(AuthInitial()) {
     on<AuthSignUp>(_onSignUp);
     on<AuthSignIn>(_onSignIn);
@@ -38,10 +42,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         username: event.username,
       ),
     );
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthSuccess(user)),
-    );
+    result.fold((failure) => emit(AuthFailure(failure.message)), (user) {
+      _currentUserCubit.updateUser(user);
+      emit(AuthSuccess(user));
+    });
   }
 
   Future<void> _onSignIn(AuthSignIn event, Emitter<AuthState> emit) async {
@@ -49,10 +53,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _userSignIn(
       SignInParams(email: event.email, password: event.password),
     );
-    result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
-      (user) => emit(AuthSuccess(user)),
-    );
+    result.fold((failure) => emit(AuthFailure(failure.message)), (user) {
+      _currentUserCubit.updateUser(user);
+      emit(AuthSuccess(user));
+    });
   }
 
   Future<void> _onCheckSession(
@@ -63,8 +67,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _getCurrentUser(NoParams());
     result.fold((failure) => emit(AuthFailure(failure.message)), (user) {
       if (user == null) {
+        _currentUserCubit.clearUser();
         emit(AuthInitial());
       } else {
+        _currentUserCubit.updateUser(user);
         emit(AuthSuccess(user));
       }
     });
@@ -75,9 +81,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _userSignOut(NoParams());
     result.fold(
       (failure) => emit(AuthFailure(failure.message)),
-      (_) => emit(
-        AuthInitial(),
-      ), // Successful sign-out routes back to Initial/Unauthenticated state
+      (_) {
+        _currentUserCubit.clearUser();
+        emit(AuthInitial());
+      }, // Successful sign-out routes back to Initial/Unauthenticated state
     );
   }
 }

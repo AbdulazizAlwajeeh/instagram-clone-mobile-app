@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
-import '../entities/app_user.dart';
+import '../../../../core/app_user/domain/entities/app_user.dart';
 
 abstract class AuthRepository {
   /// Fetches the active authenticated user session.
