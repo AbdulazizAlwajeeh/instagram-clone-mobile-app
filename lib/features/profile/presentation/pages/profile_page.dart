@@ -21,7 +21,13 @@ class ProfilePage extends StatelessWidget {
       create: (_) => profileBloc..add(ProfileFetchRequested(userId: userId)),
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Profile'),
+          title: BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, state) {
+              return state is ProfileLoadSuccess
+                  ? Text(state.profile.username)
+                  : Text('');
+            },
+          ),
           centerTitle: false,
           actions: [
             BlocBuilder<ProfileBloc, ProfileState>(

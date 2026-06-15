@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/features/profile/presentation/widgets/profile_actions.dart';
+import 'package:yemengram/features/profile/presentation/widgets/profile_avatar.dart';
+import 'package:yemengram/features/profile/presentation/widgets/profile_stats.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
 import '../../domain/entities/user_profile.dart';
@@ -23,44 +26,12 @@ class ProfileHeaderSection extends StatelessWidget {
           // Metric Profile Row
           Row(
             children: [
-              CircleAvatar(
-                radius: 44.0,
-                backgroundColor: context.colorScheme.primary.withValues(
-                  alpha: 0.15,
-                ),
-                backgroundImage:
-                    profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
-                    ? NetworkImage(profile.avatarUrl!)
-                    : null,
-                child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
-                    ? Icon(
-                        Icons.person,
-                        size: 40.0,
-                        color: context.colorScheme.primary,
-                      )
-                    : null,
-              ),
+              ProfileAvatar(avatarUrl: profile.avatarUrl),
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    StatColumn(
-                      count: profile.postsCount.toString(),
-                      label: 'Posts',
-                    ),
-                    StatColumn(
-                      count: profile.followersCount.toString(),
-                      label:
-                          'Follow'
-                          'ers',
-                    ),
-                    StatColumn(
-                      count: profile.followingCount.toString(),
-                      label:
-                          'Follow'
-                          'ing',
-                    ),
-                  ],
+                child: ProfileStats(
+                  postsCount: profile.postsCount,
+                  followersCount: profile.followersCount,
+                  followingCount: profile.followingCount,
                 ),
               ),
             ],
@@ -80,143 +51,15 @@ class ProfileHeaderSection extends StatelessWidget {
           ],
 
           // Action Block Buttons
-          Row(
-            children: [
-              if (isMe) ...[
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        AppDimensions.minTouchTarget,
-                      ),
-                      side: BorderSide(
-                        color: context.colorScheme.primary.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.borderRadiusSm,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      'Edit Profile',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.sm),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        AppDimensions.minTouchTarget,
-                      ),
-                      side: BorderSide(
-                        color: context.colorScheme.primary.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.borderRadiusSm,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      'Share Profile',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ] else ...[
-                // Visitor Profile Layout Buttons
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: context.colorScheme.primary,
-                      foregroundColor: context.colorScheme.onPrimary,
-                      minimumSize: const Size.fromHeight(
-                        AppDimensions.minTouchTarget,
-                      ),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.borderRadiusSm,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      'Follow',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: AppDimensions.sm),
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {},
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(
-                        AppDimensions.minTouchTarget,
-                      ),
-                      side: BorderSide(
-                        color: context.colorScheme.primary.withValues(
-                          alpha: 0.5,
-                        ),
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          AppDimensions.borderRadiusSm,
-                        ),
-                      ),
-                    ),
-                    child: Text(
-                      'Message',
-                      style: context.textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ],
+          ProfileActions(
+            isMe: isMe,
+            onEditPressed: () {},
+            onSharePressed: () {},
+            onFollowPressed: () {},
+            onMessagePressed: () {},
           ),
         ],
       ),
-    );
-  }
-}
-
-class StatColumn extends StatelessWidget {
-  final String count;
-  final String label;
-
-  const StatColumn({super.key, required this.count, required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          count,
-          style: context.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(label, style: context.textTheme.labelSmall),
-      ],
     );
   }
 }
