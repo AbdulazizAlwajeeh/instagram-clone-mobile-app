@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
+import '../../domain/entities/user_profile.dart';
 
 class ProfileHeaderSection extends StatelessWidget {
-  const ProfileHeaderSection({super.key});
+  final UserProfile profile;
+  final bool isMe;
+
+  const ProfileHeaderSection({
+    super.key,
+    required this.profile,
+    required this.isMe,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,19 +28,38 @@ class ProfileHeaderSection extends StatelessWidget {
                 backgroundColor: context.colorScheme.primary.withValues(
                   alpha: 0.15,
                 ),
-                child: Icon(
-                  Icons.person,
-                  size: 40.0,
-                  color: context.colorScheme.primary,
-                ),
+                backgroundImage:
+                    profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty
+                    ? NetworkImage(profile.avatarUrl!)
+                    : null,
+                child: profile.avatarUrl == null || profile.avatarUrl!.isEmpty
+                    ? Icon(
+                        Icons.person,
+                        size: 40.0,
+                        color: context.colorScheme.primary,
+                      )
+                    : null,
               ),
-              const Expanded(
+              Expanded(
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    StatColumn(count: '142', label: 'Posts'),
-                    StatColumn(count: '12.4K', label: 'Followers'),
-                    StatColumn(count: '482', label: 'Following'),
+                    StatColumn(
+                      count: profile.postsCount.toString(),
+                      label: 'Posts',
+                    ),
+                    StatColumn(
+                      count: profile.followersCount.toString(),
+                      label:
+                          'Follow'
+                          'ers',
+                    ),
+                    StatColumn(
+                      count: profile.followingCount.toString(),
+                      label:
+                          'Follow'
+                          'ing',
+                    ),
                   ],
                 ),
               ),
@@ -42,70 +69,127 @@ class ProfileHeaderSection extends StatelessWidget {
 
           // Bio Metadata Stack
           Text(
-            'Engineering Lead',
+            profile.fullName.toString(),
             style: context.textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: AppDimensions.xs),
-          Text(
-            'Building distributed systems and reactive user interfaces. Strictly clean architecture frameworks.',
-            style: context.textTheme.bodyMedium,
-          ),
-          const SizedBox(height: AppDimensions.md),
+          if (profile.bio != null && profile.bio!.isNotEmpty) ...[
+            const SizedBox(height: AppDimensions.xs),
+            Text(profile.bio!, style: context.textTheme.bodyMedium),
+          ],
 
           // Action Block Buttons
           Row(
             children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(
-                      AppDimensions.minTouchTarget,
+              if (isMe) ...[
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(
+                        AppDimensions.minTouchTarget,
+                      ),
+                      side: BorderSide(
+                        color: context.colorScheme.primary.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.borderRadiusSm,
+                        ),
+                      ),
                     ),
-                    side: BorderSide(
-                      color: context.colorScheme.primary.withValues(alpha: 0.5),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.borderRadiusSm,
+                    child: Text(
+                      'Edit Profile',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  child: Text(
-                    'Edit Profile',
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
                 ),
-              ),
-              const SizedBox(width: AppDimensions.sm),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(
-                      AppDimensions.minTouchTarget,
+                const SizedBox(width: AppDimensions.sm),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(
+                        AppDimensions.minTouchTarget,
+                      ),
+                      side: BorderSide(
+                        color: context.colorScheme.primary.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.borderRadiusSm,
+                        ),
+                      ),
                     ),
-                    side: BorderSide(
-                      color: context.colorScheme.primary.withValues(alpha: 0.5),
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                        AppDimensions.borderRadiusSm,
+                    child: Text(
+                      'Share Profile',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ),
-                  child: Text(
-                    'Share Profile',
-                    style: context.textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+                ),
+              ] else ...[
+                // Visitor Profile Layout Buttons
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: context.colorScheme.primary,
+                      foregroundColor: context.colorScheme.onPrimary,
+                      minimumSize: const Size.fromHeight(
+                        AppDimensions.minTouchTarget,
+                      ),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.borderRadiusSm,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Follow',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
-              ),
+                const SizedBox(width: AppDimensions.sm),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () {},
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(
+                        AppDimensions.minTouchTarget,
+                      ),
+                      side: BorderSide(
+                        color: context.colorScheme.primary.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppDimensions.borderRadiusSm,
+                        ),
+                      ),
+                    ),
+                    child: Text(
+                      'Message',
+                      style: context.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ],

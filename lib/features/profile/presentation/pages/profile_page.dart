@@ -1,40 +1,75 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/features/profile/presentation/bloc/profile_bloc.dart';
 import '../../../../core/router/app_router.dart';
+import '../bloc/profile_event.dart';
+import '../bloc/profile_state.dart';
 import '../widgets/profile_header_section.dart';
 import '../widgets/profile_post_grid.dart';
 import '../widgets/profile_tab_delegate.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  final String? userId;
+  final ProfileBloc profileBloc;
+
+  const ProfilePage({super.key, this.userId, required this.profileBloc});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings_outlined),
-            tooltip: 'Open Settings',
-            onPressed: () {
-              context.go(AppRouter.settingsFullPath);
-            },
-          ),
-        ],
-      ),
-      body: CustomScrollView(
-        slivers: [
-          // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
-          const SliverToBoxAdapter(child: ProfileHeaderSection()),
+    return BlocProvider<ProfileBloc>(
+      create: (_) => profileBloc..add(ProfileFetchRequested(userId: userId!)),
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Profile'),
+          centerTitle: false,
+          actions: [
+            BlocBuilder<ProfileBloc, ProfileState>(
+              builder: (context, state) {
+                if (state is ProfileLoadSuccess && state.isMe) {
+                  return IconButton(
+                    icon: const Icon(Icons.settings_outlined),
+                    tooltip: 'Open Settings',
+                    onPressed: () => context.go(AppRouter.settingsFullPath),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
+          ],
+        ),
+        body: BlocBuilder<ProfileBloc, ProfileState>(
+          builder: (context, state) {
+            if (state is ProfileLoading || state is ProfileInitial) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-          // 2. Pinned Layout Tab Bar
-          SliverPersistentHeader(pinned: true, delegate: ProfileTabDelegate()),
+            if (state is ProfileLoadFailure) {
+              return Center(child: Text(state.errorMessage));
+            }
+            return CustomScrollView(
+              slivers: [
+                if (state is ProfileLoadSuccess)
+                  // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
+                  SliverToBoxAdapter(
+                    child: ProfileHeaderSection(
+                      profile: state.profile,
+                      isMe: state.isMe,
+                    ),
+                  ),
 
-          // 3. Aspect-Locked Post Grid Stub
-          const ProfilePostGrid(),
-        ],
+                // 2. Pinned Layout Tab Bar
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: ProfileTabDelegate(),
+                ),
+
+                // 3. Aspect-Locked Post Grid Stub
+                const ProfilePostGrid(),
+              ],
+            );
+          },
+        ),
       ),
     );
   }

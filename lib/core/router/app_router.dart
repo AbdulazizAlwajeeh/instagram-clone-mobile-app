@@ -11,7 +11,9 @@ import 'package:yemengram/features/search/presentation/pages/search_page.dart';
 import 'package:yemengram/features/post/presentation/pages/post_page.dart';
 import 'package:yemengram/features/chat/presentation/pages/chat_page.dart';
 import 'package:yemengram/features/profile/presentation/pages/profile_page.dart';
+import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
+import '../../init_dependencies.dart';
 
 class AppRouter {
   final AuthBloc _authBloc;
@@ -34,6 +36,8 @@ class AppRouter {
       'settings'; // Relative path (No leading slash)
   static const String settingsFullPath =
       '/profile/settings'; // Full path for navigation calls
+
+  static const String dynamicProfileSubPath = 'user/:userId';
 
   // Root navigator key for global context operations if needed
   static final GlobalKey<NavigatorState> rootNavigatorKey =
@@ -68,6 +72,18 @@ class AppRouter {
               GoRoute(
                 path: feedPath,
                 builder: (context, state) => const FeedPage(),
+                routes: [
+                  GoRoute(
+                    path: dynamicProfileSubPath,
+                    builder: (context, state) {
+                      final targetUserId = state.pathParameters['userId'];
+                      return ProfilePage(
+                        userId: targetUserId,
+                        profileBloc: serviceLocator<ProfileBloc>(),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -76,6 +92,18 @@ class AppRouter {
               GoRoute(
                 path: searchPath,
                 builder: (context, state) => const SearchPage(),
+                routes: [
+                  GoRoute(
+                    path: dynamicProfileSubPath,
+                    builder: (context, state) {
+                      final targetUserId = state.pathParameters['userId'];
+                      return ProfilePage(
+                        userId: targetUserId,
+                        profileBloc: serviceLocator<ProfileBloc>(),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -92,6 +120,18 @@ class AppRouter {
               GoRoute(
                 path: chatPath,
                 builder: (context, state) => const ChatPage(),
+                routes: [
+                  GoRoute(
+                    path: dynamicProfileSubPath,
+                    builder: (context, state) {
+                      final targetUserId = state.pathParameters['userId'];
+                      return ProfilePage(
+                        userId: targetUserId,
+                        profileBloc: serviceLocator<ProfileBloc>(),
+                      );
+                    },
+                  ),
+                ],
               ),
             ],
           ),
@@ -99,7 +139,10 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: profilePath,
-                builder: (context, state) => const ProfilePage(),
+                builder: (context, state) => ProfilePage(
+                  userId: null,
+                  profileBloc: serviceLocator<ProfileBloc>(),
+                ),
                 routes: [
                   // --- Sub-Route: Settings ---
                   // Declared as a child of profile so it stays inside the profile tab shell
