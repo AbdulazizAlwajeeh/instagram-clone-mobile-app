@@ -18,6 +18,12 @@ import 'core/theme/data/datasources/theme_local_data_source_impl.dart';
 import 'core/theme/data/repositories/theme_repository_impl.dart';
 import 'core/theme/domain/repositories/theme_repository.dart';
 import 'core/theme/presentation/bloc/theme_bloc.dart';
+import 'features/profile/data/datasources/profile_remote_data_source.dart';
+import 'features/profile/data/datasources/profile_remote_data_source_impl.dart';
+import 'features/profile/data/repositories/profile_repository_impl.dart';
+import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/fetch_user_profile.dart';
+import 'features/profile/presentation/bloc/profile_bloc.dart';
 
 final serviceLocator = GetIt.instance;
 
@@ -46,6 +52,8 @@ Future<void> initDependencies() async {
 
   // Initialize Auth Feature dependencies
   _initAuth();
+
+  _initProfile();
 
   // Register Global Core Router Singleton
   serviceLocator.registerSingleton<AppRouter>(
@@ -91,6 +99,27 @@ void _initAuth() {
         userSignIn: serviceLocator(),
         getCurrentUser: serviceLocator(),
         userSignOut: serviceLocator(),
+        currentUserCubit: serviceLocator(),
+      ),
+    );
+}
+
+void _initProfile() {
+  serviceLocator
+    // Data Source
+    ..registerFactory<ProfileRemoteDataSource>(
+      () => ProfileRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+    )
+    // Repository
+    ..registerFactory<ProfileRepository>(
+      () => ProfileRepositoryImpl(serviceLocator()),
+    )
+    // Use Cases
+    ..registerFactory(() => FetchUserProfile(serviceLocator()))
+    // Bloc
+    ..registerFactory(
+      () => ProfileBloc(
+        fetchUserProfile: serviceLocator(),
         currentUserCubit: serviceLocator(),
       ),
     );
