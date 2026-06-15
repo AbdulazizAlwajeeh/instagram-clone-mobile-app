@@ -23,14 +23,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
       ) async {
     emit(ProfileLoading());
 
-    // Evaluate identity boundary directly by reading core current state
-    bool calculatedIsMe = false;
+    // 1. Safe extraction of your logged-in ID from core session state
+    String? currentLoggedInId;
     final currentUserState = _currentUserCubit.state;
     if (currentUserState is CurrentUserLoggedIn) {
-      calculatedIsMe = currentUserState.user.id == event.userId;
+      currentLoggedInId = currentUserState.user.id;
     }
 
-    final result = await _fetchUserProfile(event.userId);
+    // 2. Resolve the final target ID (fallback to current user if parameter is null)
+    final String? targetUserId = event.userId ?? currentLoggedInId;
+
+    // Safeguard gate check
+    if (targetUserId == null) {
+      emit(const ProfileLoadFailure(errorMessage: 'No active user session found.'));
+      return;
+    }
+
+    // 3. Assign to a strict, non-nullable String variable to satisfy UseCase requirements
+    final String nonNullUserId = targetUserId;
+
+    // 4. Perform the identity boundary comparison securely
+    final bool calculatedIsMe = nonNullUserId == currentLoggedInId;
+
+    // 5. Run non-nullable usecase query safely
+    final result = await _fetchUserProfile(nonNullUserId);
 
     result.fold(
           (failure) => emit(ProfileLoadFailure(errorMessage: failure.message)),

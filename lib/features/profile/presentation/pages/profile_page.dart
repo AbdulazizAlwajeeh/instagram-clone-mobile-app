@@ -18,7 +18,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProfileBloc>(
-      create: (_) => profileBloc..add(ProfileFetchRequested(userId: userId!)),
+      create: (_) => profileBloc..add(ProfileFetchRequested(userId: userId)),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Profile'),
