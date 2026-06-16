@@ -1,5 +1,3 @@
-
-
 import '../../../../core/app_user/domain/entities/app_user.dart';
 
 class AppUserModel extends AppUser {
@@ -7,6 +5,7 @@ class AppUserModel extends AppUser {
     required super.id,
     required super.email,
     required super.username,
+    super.avatarUrl,
   });
 
   /// Factory constructor to convert raw Supabase database/auth maps into AppUserModel.
@@ -18,11 +17,17 @@ class AppUserModel extends AppUser {
           json['username'] as String? ??
           json['user_metadata']?['username'] as String? ??
           '',
+      avatarUrl: json['avatar_url'] as String?,
     );
   }
 
   /// Converts our model data back into a JSON map for database operations if needed.
   Map<String, dynamic> toJson() {
-    return {'id': id, 'email': email, 'username': username};
+    return {
+      'id': id,
+      'email': email,
+      'username': username,
+      'avatar_url': avatarUrl,
+    };
   }
 }
