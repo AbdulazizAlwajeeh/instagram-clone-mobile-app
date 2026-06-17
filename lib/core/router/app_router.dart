@@ -9,7 +9,8 @@ import 'package:yemengram/core/presentation/pages/main_layout.dart';
 import 'package:yemengram/features/feed/presentation/bloc/feed_bloc.dart';
 import 'package:yemengram/features/feed/presentation/pages/feed_page.dart';
 import 'package:yemengram/features/search/presentation/pages/search_page.dart';
-import 'package:yemengram/features/post/presentation/pages/post_page.dart';
+import 'package:yemengram/features/create_post/presentation/pages'
+    '/create_post_page.dart';
 import 'package:yemengram/features/chat/presentation/pages/chat_page.dart';
 import 'package:yemengram/features/profile/presentation/pages/profile_page.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
@@ -28,7 +29,7 @@ class AppRouter {
   // Tab path constants
   static const String feedPath = '/';
   static const String searchPath = '/search';
-  static const String createPostPath = '/create-post';
+  static const String createPostPath = '/create-create_post';
   static const String chatPath = '/chat';
   static const String profilePath = '/profile';
 
