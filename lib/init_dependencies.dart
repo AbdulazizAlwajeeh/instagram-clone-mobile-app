@@ -18,6 +18,12 @@ import 'core/theme/data/datasources/theme_local_data_source_impl.dart';
 import 'core/theme/data/repositories/theme_repository_impl.dart';
 import 'core/theme/domain/repositories/theme_repository.dart';
 import 'core/theme/presentation/bloc/theme_bloc.dart';
+import 'features/feed/data/datasources/feed_remote_data_source.dart';
+import 'features/feed/data/datasources/feed_remote_data_source_impl.dart';
+import 'features/feed/data/repositories/feed_repository_impl.dart';
+import 'features/feed/domain/repositories/feed_repository.dart';
+import 'features/feed/domain/usecases/get_followed_users_posts.dart';
+import 'features/feed/presentation/bloc/feed_bloc.dart';
 import 'features/profile/data/datasources/profile_remote_data_source.dart';
 import 'features/profile/data/datasources/profile_remote_data_source_impl.dart';
 import 'features/profile/data/repositories/profile_repository_impl.dart';
@@ -54,6 +60,8 @@ Future<void> initDependencies() async {
   _initAuth();
 
   _initProfile();
+
+  _initFeed();
 
   // Register Global Core Router Singleton
   serviceLocator.registerSingleton<AppRouter>(
@@ -120,6 +128,29 @@ void _initProfile() {
     ..registerFactory(
       () => ProfileBloc(
         fetchUserProfile: serviceLocator(),
+        currentUserCubit: serviceLocator(),
+      ),
+    );
+}
+
+void _initFeed() {
+  serviceLocator
+    // 1. Data Source: Injects the global SupabaseClient
+    ..registerFactory<FeedRemoteDataSource>(
+      () => FeedRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+    )
+    // 2. Repository: Injects the FeedRemoteDataSource we just registered above
+    ..registerFactory<FeedRepository>(
+      () => FeedRepositoryImpl(serviceLocator<FeedRemoteDataSource>()),
+    )
+    // 3. Use Case: Injects the FeedRepository contract
+    ..registerFactory(
+      () => GetFollowedUsersPosts(serviceLocator<FeedRepository>()),
+    )
+    // 4. Bloc: Multi-instance factory binding the required use case and the global session cubit
+    ..registerFactory(
+      () => FeedBloc(
+        getFollowedUsersPosts: serviceLocator(),
         currentUserCubit: serviceLocator(),
       ),
     );
