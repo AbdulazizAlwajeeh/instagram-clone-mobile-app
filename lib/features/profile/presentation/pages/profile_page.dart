@@ -53,9 +53,9 @@ class ProfilePage extends StatelessWidget {
             if (state is ProfileLoadFailure) {
               return Center(child: Text(state.errorMessage));
             }
-            return CustomScrollView(
-              slivers: [
-                if (state is ProfileLoadSuccess)
+            if (state is ProfileLoadSuccess) {
+              return CustomScrollView(
+                slivers: [
                   // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
                   SliverToBoxAdapter(
                     child: ProfileHeaderSection(
@@ -64,16 +64,18 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
 
-                // 2. Pinned Layout Tab Bar
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: ProfileTabDelegate(),
-                ),
+                  // 2. Pinned Layout Tab Bar
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: ProfileTabDelegate(),
+                  ),
 
-                // 3. Aspect-Locked Post Grid Stub
-                const ProfilePostGrid(),
-              ],
-            );
+                  // 3. Aspect-Locked Post Grid Stub
+                  ProfilePostGrid(posts: state.posts),
+                ],
+              );
+            }
+            return const SizedBox();
           },
         ),
       ),

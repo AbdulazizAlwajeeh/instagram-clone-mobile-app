@@ -1,26 +1,34 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:fpdart/fpdart.dart';
 import '../../../../core/app_user/presentation/cubit/current_user_cubit.dart';
+import '../../../../core/error/failures.dart';
+import '../../../../core/posts/domain/entities/post.dart';
+import '../../domain/entities/user_profile.dart';
+import '../../domain/usecases/fetch_user_posts.dart';
 import '../../domain/usecases/fetch_user_profile.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final FetchUserProfile _fetchUserProfile;
+  final FetchUserPosts _fetchUserPosts;
   final CurrentUserCubit _currentUserCubit;
 
   ProfileBloc({
     required FetchUserProfile fetchUserProfile,
+    required FetchUserPosts fetchUserPosts,
     required CurrentUserCubit currentUserCubit,
-  })  : _fetchUserProfile = fetchUserProfile,
-        _currentUserCubit = currentUserCubit,
-        super(ProfileInitial()) {
+  }) : _fetchUserProfile = fetchUserProfile,
+       _fetchUserPosts = fetchUserPosts,
+       _currentUserCubit = currentUserCubit,
+       super(ProfileInitial()) {
     on<ProfileFetchRequested>(_onFetchRequested);
   }
 
   Future<void> _onFetchRequested(
-      ProfileFetchRequested event,
-      Emitter<ProfileState> emit,
-      ) async {
+    ProfileFetchRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
     emit(ProfileLoading());
 
     // 1. Safe extraction of your logged-in ID from core session state
@@ -35,7 +43,9 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
 
     // Safeguard gate check
     if (targetUserId == null) {
-      emit(const ProfileLoadFailure(errorMessage: 'No active user session found.'));
+      emit(
+        const ProfileLoadFailure(errorMessage: 'No active user session found.'),
+      );
       return;
     }
 
@@ -45,15 +55,30 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     // 4. Perform the identity boundary comparison securely
     final bool calculatedIsMe = nonNullUserId == currentLoggedInId;
 
-    // 5. Run non-nullable usecase query safely
-    final result = await _fetchUserProfile(nonNullUserId);
+    // 5. Execute both queries
+    final results = await Future.wait([
+      _fetchUserProfile(nonNullUserId),
+      _fetchUserPosts(nonNullUserId),
+    ]);
 
-    result.fold(
+    final profileResult = results[0] as Either<Failure, UserProfile>;
+    final postsResult = results[1] as Either<Failure, List<Post>>;
+
+    // Combine the results safely into success state
+    profileResult.fold(
+      (failure) => emit(ProfileLoadFailure(errorMessage: failure.message)),
+      (profile) {
+        postsResult.fold(
           (failure) => emit(ProfileLoadFailure(errorMessage: failure.message)),
-          (profile) => emit(ProfileLoadSuccess(
-        profile: profile,
-        isMe: calculatedIsMe,
-      )),
+          (posts) => emit(
+            ProfileLoadSuccess(
+              profile: profile,
+              posts: posts,
+              isMe: calculatedIsMe,
+            ),
+          ),
+        );
+      },
     );
   }
 }

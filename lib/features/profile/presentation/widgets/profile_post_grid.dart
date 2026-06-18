@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/theme_extensions.dart';
+import 'package:yemengram/core/posts/domain/entities/post.dart';
 
 class ProfilePostGrid extends StatelessWidget {
-  const ProfilePostGrid({super.key});
+  final List<Post> posts;
+
+  const ProfilePostGrid({super.key, required this.posts});
 
   @override
   Widget build(BuildContext context) {
-    final blockSurfaceColor = context.colorScheme.brightness == Brightness.dark
-        ? const Color(0xFF1E293B) // Slate 800 (AppColors.surfaceDark)
-        : const Color(0xFFE2E8F0); // Slate 200 light contrast
-
     return SliverGrid(
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
@@ -18,14 +16,36 @@ class ProfilePostGrid extends StatelessWidget {
         childAspectRatio: 1.0,
       ),
       delegate: SliverChildBuilderDelegate((context, index) {
-        return Container(
-          color: blockSurfaceColor,
-          child: Icon(
-            Icons.image,
-            color: context.colorScheme.primary.withValues(alpha: 0.25),
+        return GestureDetector(
+          onTap: () {},
+          child: Image.network(
+            posts[index].mediaUrl,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                color: Colors.grey[300],
+                child: const Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                color: Colors.grey[400],
+                child: const Icon(
+                  Icons.broken_image_outlined,
+                  color: Colors.white,
+                ),
+              );
+            },
           ),
         );
-      }, childCount: 18),
+      }, childCount: posts.length),
     );
   }
 }

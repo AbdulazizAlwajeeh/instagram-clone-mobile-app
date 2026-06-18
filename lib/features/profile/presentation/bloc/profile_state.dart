@@ -1,3 +1,4 @@
+import 'package:yemengram/core/posts/domain/entities/post.dart';
 import '../../domain/entities/user_profile.dart';
 
 sealed class ProfileState {
@@ -14,8 +15,13 @@ class ProfileLoading extends ProfileState {}
 class ProfileLoadSuccess extends ProfileState {
   final UserProfile profile;
   final bool isMe;
+  final List<Post> posts;
 
-  const ProfileLoadSuccess({required this.profile, required this.isMe});
+  const ProfileLoadSuccess({
+    required this.profile,
+    required this.isMe,
+    required this.posts,
+  });
 }
 
 /// Failure boundary capturing operational exceptions.

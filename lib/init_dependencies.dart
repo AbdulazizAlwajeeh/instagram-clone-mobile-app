@@ -34,6 +34,7 @@ import 'features/profile/data/datasources/profile_remote_data_source.dart';
 import 'features/profile/data/datasources/profile_remote_data_source_impl.dart';
 import 'features/profile/data/repositories/profile_repository_impl.dart';
 import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/fetch_user_posts.dart';
 import 'features/profile/domain/usecases/fetch_user_profile.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 
@@ -132,10 +133,12 @@ void _initProfile() {
     )
     // Use Cases
     ..registerFactory(() => FetchUserProfile(serviceLocator()))
+    ..registerFactory(() => FetchUserPosts(serviceLocator()))
     // Bloc
     ..registerFactory(
       () => ProfileBloc(
         fetchUserProfile: serviceLocator(),
+        fetchUserPosts: serviceLocator(),
         currentUserCubit: serviceLocator(),
       ),
     );
