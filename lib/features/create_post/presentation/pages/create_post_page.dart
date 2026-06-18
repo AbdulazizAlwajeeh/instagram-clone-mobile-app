@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:yemengram/core/router/app_router.dart';
 import 'package:yemengram/features/create_post/presentation/widgets/caption_input_field.dart';
 import 'package:yemengram/features/create_post/presentation/widgets/image_source_picker.dart';
 import '../../../../core/theme/theme_extensions.dart';
@@ -58,6 +60,14 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
+  void _resetAndPop() {
+    setState(() {
+      _captionController.clear();
+      _selectedImage = null;
+      context.go(AppRouter.feedPath);
+    });
+  }
+
   @override
   void dispose() {
     _captionController.dispose();
@@ -77,6 +87,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Post published successfully! 🎉')),
           );
+          _resetAndPop();
         }
       },
       builder: (context, state) {
@@ -91,7 +102,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
             centerTitle: true,
             leading: IconButton(
               icon: const Icon(Icons.close),
-              onPressed: () {},
+              onPressed: () {
+                _resetAndPop();
+              },
             ),
             actions: [
               state is CreatePostLoading
