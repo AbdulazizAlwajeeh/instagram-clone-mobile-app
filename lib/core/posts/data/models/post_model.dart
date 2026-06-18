@@ -29,6 +29,21 @@ class PostModel extends Post {
     );
   }
 
+  /// Efficient constructor for flat post queries without table joins
+  factory PostModel.fromFlatJson(Map<String, dynamic> json) {
+    final String postAuthorId = json['user_id'] as String;
+
+    return PostModel(
+      id: json['id'] as String,
+      author: AppUserModel(id: postAuthorId, username: '', email: ''),
+      caption: json['caption'] as String?,
+      mediaUrl: json['media_url'] as String,
+      likesCount: json['likes_count'] as int,
+      commentsCount: json['comments_count'] as int,
+      createdAt: DateTime.parse(json['created_at'] as String),
+    );
+  }
+
   /// Method to convert a PostModel back into a Supabase JSON map (useful for inserting data)
   Map<String, dynamic> toJson() {
     return {
