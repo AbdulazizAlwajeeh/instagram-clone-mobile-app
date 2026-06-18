@@ -1,10 +1,141 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:yemengram/features/create_post/presentation/widgets/caption_input_field.dart';
+import 'package:yemengram/features/create_post/presentation/widgets/image_source_picker.dart';
+import '../../../../core/theme/theme_extensions.dart';
+import '../bloc/create_post_bloc.dart';
+import '../widgets/media_picker.dart';
 
-class CreatePostPage extends StatelessWidget {
+class CreatePostPage extends StatefulWidget {
   const CreatePostPage({super.key});
 
   @override
+  State<CreatePostPage> createState() => _CreatePostPageState();
+}
+
+class _CreatePostPageState extends State<CreatePostPage> {
+  final TextEditingController _captionController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+  File? _selectedImage;
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 80, // Optimizes file size for uploads
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _selectedImage = File(pickedFile.path); // Updates UI with new image
+        });
+      }
+    } catch (e) {
+      // Handle permission denied or picking errors here gracefully
+      debugPrint('Error picking image: $e');
+    }
+  }
+
+  void _onPublishPressed(CreatePostState state) {
+    if (state is CreatePostLoading) return;
+
+    if (_selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select an image first.')),
+      );
+      return;
+    }
+
+    final trimmedCaption = _captionController.text.trim();
+
+    context.read<CreatePostBloc>().add(
+      PublishPostEvent(
+        caption: trimmedCaption.isEmpty ? '' : trimmedCaption,
+        mediaFile: _selectedImage!,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _captionController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Create Post Tab')));
+    return BlocConsumer<CreatePostBloc, CreatePostState>(
+      listener: (context, state) {
+        if (state is CreatePostFailure) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.errorMessage)));
+        }
+        if (state is CreatePostSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Post published successfully! 🎉')),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'New Post',
+              style: context.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            centerTitle: true,
+            leading: IconButton(
+              icon: const Icon(Icons.close),
+              onPressed: () {},
+            ),
+            actions: [
+              state is CreatePostLoading
+                  ? const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Center(
+                        child: SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    )
+                  : TextButton(
+                      onPressed: () {
+                        _onPublishPressed(state);
+                      },
+                      child: Text(
+                        'Publish',
+                        style: context.textTheme.labelLarge?.copyWith(
+                          color: context.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+            ],
+          ),
+          body: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                MediaPickerPlaceholder(
+                  selectedImage: _selectedImage,
+                  onTap: (context) =>
+                      ImageSourcePicker.show(context, _pickImage),
+                ),
+                const Divider(height: 1.0),
+                CaptionInputField(controller: _captionController),
+                const Divider(height: 1.0),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 }

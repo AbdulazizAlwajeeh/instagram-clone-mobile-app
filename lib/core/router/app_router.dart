@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_state.dart';
 import 'package:yemengram/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:yemengram/features/auth/presentation/pages/sign_up_page.dart';
 import 'package:yemengram/core/presentation/pages/main_layout.dart';
+import 'package:yemengram/features/create_post/presentation/bloc/create_post_bloc.dart';
 import 'package:yemengram/features/feed/presentation/bloc/feed_bloc.dart';
 import 'package:yemengram/features/feed/presentation/pages/feed_page.dart';
 import 'package:yemengram/features/search/presentation/pages/search_page.dart';
@@ -114,7 +116,10 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: createPostPath,
-                builder: (context, state) => const CreatePostPage(),
+                builder: (context, state) => BlocProvider(
+                  create: (context) => serviceLocator<CreatePostBloc>(),
+                  child: const CreatePostPage(),
+                ),
               ),
             ],
           ),
