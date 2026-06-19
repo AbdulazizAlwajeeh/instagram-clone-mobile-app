@@ -32,14 +32,36 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
        super(ProfileInitial()) {
     on<ProfileFetchRequested>(_onFetchRequested);
     on<ProfileFollowToggleRequested>(_onFollowToggleRequested);
+    on<ProfileRefreshRequested>(_onRefreshRequested);
   }
 
   Future<void> _onFetchRequested(
     ProfileFetchRequested event,
     Emitter<ProfileState> emit,
   ) async {
-    emit(ProfileLoading());
+    await _loadProfileData(
+      userId: event.userId,
+      showFullScreenLoader: true,
+      emit: emit,
+    );
+  }
 
+  Future<void> _onRefreshRequested(
+    ProfileRefreshRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    await _loadProfileData(
+      userId: event.userId,
+      showFullScreenLoader: false,
+      emit: emit,
+    );
+  }
+
+  Future<void> _loadProfileData({
+    required String? userId,
+    required bool showFullScreenLoader,
+    required Emitter<ProfileState> emit,
+  }) async {
     // 1. Safe extraction of your logged-in ID from core session state
     String? currentLoggedInId;
     final currentUserState = _currentUserCubit.state;
@@ -48,7 +70,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     }
 
     // 2. Resolve the final target ID (fallback to current user if parameter is null)
-    final String? targetUserId = event.userId ?? currentLoggedInId;
+    final String? targetUserId = userId ?? currentLoggedInId;
 
     // Safeguard gate check
     if (targetUserId == null) {

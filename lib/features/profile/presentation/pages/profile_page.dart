@@ -10,7 +10,6 @@ import '../widgets/profile_post_grid.dart';
 import '../widgets/profile_tab_delegate.dart';
 
 class ProfilePage extends StatelessWidget {
-
   const ProfilePage({super.key});
 
   @override
@@ -50,32 +49,43 @@ class ProfilePage extends StatelessWidget {
             return Center(child: Text(state.errorMessage));
           }
           if (state is ProfileLoadSuccess) {
-            return CustomScrollView(
-              slivers: [
-                // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
-                SliverToBoxAdapter(
-                  child: ProfileHeaderSection(
-                    profile: state.profile,
-                    isMe: state.isMe,
-                    onFollowPressed: () {
-                      context.read<ProfileBloc>().add(
-                        ProfileFollowToggleRequested(
-                          targetUserId: state.profile.id,
-                        ),
-                      );
-                    },
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<ProfileBloc>().add(
+                  ProfileRefreshRequested(userId: state.profile.id),
+                );
+                await context.read<ProfileBloc>().stream.firstWhere(
+                  (state) => state is! ProfileLoading,
+                );
+              },
+              child: CustomScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                slivers: [
+                  // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
+                  SliverToBoxAdapter(
+                    child: ProfileHeaderSection(
+                      profile: state.profile,
+                      isMe: state.isMe,
+                      onFollowPressed: () {
+                        context.read<ProfileBloc>().add(
+                          ProfileFollowToggleRequested(
+                            targetUserId: state.profile.id,
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
 
-                // 2. Pinned Layout Tab Bar
-                SliverPersistentHeader(
-                  pinned: true,
-                  delegate: ProfileTabDelegate(),
-                ),
+                  // 2. Pinned Layout Tab Bar
+                  SliverPersistentHeader(
+                    pinned: true,
+                    delegate: ProfileTabDelegate(),
+                  ),
 
-                // 3. Aspect-Locked Post Grid Stub
-                ProfilePostGrid(posts: state.posts),
-              ],
+                  // 3. Aspect-Locked Post Grid Stub
+                  ProfilePostGrid(posts: state.posts),
+                ],
+              ),
             );
           }
           return const SizedBox();
