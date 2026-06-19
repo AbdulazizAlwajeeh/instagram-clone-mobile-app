@@ -43,6 +43,17 @@ class AppRouter {
 
   static const String dynamicProfileSubPath = 'user/:userId';
 
+  final userProfileRoute = GoRoute(
+    path: dynamicProfileSubPath,
+    builder: (context, state) {
+      final targetUserId = state.pathParameters['userId'];
+      return ProfilePage(
+        userId: targetUserId,
+        profileBloc: serviceLocator<ProfileBloc>(),
+      );
+    },
+  );
+
   // Root navigator key for global context operations if needed
   static final GlobalKey<NavigatorState> rootNavigatorKey =
       GlobalKey<NavigatorState>();
@@ -77,18 +88,7 @@ class AppRouter {
                 path: feedPath,
                 builder: (context, state) =>
                     FeedPage(feedBloc: serviceLocator<FeedBloc>()),
-                routes: [
-                  GoRoute(
-                    path: dynamicProfileSubPath,
-                    builder: (context, state) {
-                      final targetUserId = state.pathParameters['userId'];
-                      return ProfilePage(
-                        userId: targetUserId,
-                        profileBloc: serviceLocator<ProfileBloc>(),
-                      );
-                    },
-                  ),
-                ],
+                routes: [userProfileRoute],
               ),
             ],
           ),
@@ -97,18 +97,7 @@ class AppRouter {
               GoRoute(
                 path: searchPath,
                 builder: (context, state) => const SearchPage(),
-                routes: [
-                  GoRoute(
-                    path: dynamicProfileSubPath,
-                    builder: (context, state) {
-                      final targetUserId = state.pathParameters['userId'];
-                      return ProfilePage(
-                        userId: targetUserId,
-                        profileBloc: serviceLocator<ProfileBloc>(),
-                      );
-                    },
-                  ),
-                ],
+                routes: [userProfileRoute],
               ),
             ],
           ),
@@ -128,18 +117,7 @@ class AppRouter {
               GoRoute(
                 path: chatPath,
                 builder: (context, state) => const ChatPage(),
-                routes: [
-                  GoRoute(
-                    path: dynamicProfileSubPath,
-                    builder: (context, state) {
-                      final targetUserId = state.pathParameters['userId'];
-                      return ProfilePage(
-                        userId: targetUserId,
-                        profileBloc: serviceLocator<ProfileBloc>(),
-                      );
-                    },
-                  ),
-                ],
+                routes: [userProfileRoute],
               ),
             ],
           ),
