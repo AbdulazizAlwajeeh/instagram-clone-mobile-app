@@ -22,6 +22,19 @@ class ProfileLoadSuccess extends ProfileState {
     required this.isMe,
     required this.posts,
   });
+
+  /// to swap out the mutated profile copy while preserving the active posts array.
+  ProfileLoadSuccess copyWith({
+    UserProfile? profile,
+    List<Post>? posts,
+    bool? isMe,
+  }) {
+    return ProfileLoadSuccess(
+      profile: profile ?? this.profile,
+      posts: posts ?? this.posts,
+      isMe: isMe ?? this.isMe,
+    );
+  }
 }
 
 /// Failure boundary capturing operational exceptions.

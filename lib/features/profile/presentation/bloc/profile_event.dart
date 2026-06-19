@@ -8,3 +8,10 @@ class ProfileFetchRequested extends ProfileEvent {
 
   const ProfileFetchRequested({required this.userId});
 }
+
+/// Dispatched when the user interacts with the follow/unfollow action block button.
+class ProfileFollowToggleRequested extends ProfileEvent {
+  final String targetUserId;
+
+  const ProfileFollowToggleRequested({required this.targetUserId});
+}

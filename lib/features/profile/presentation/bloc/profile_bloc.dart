@@ -1,5 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:yemengram/features/profile/domain/usecases/follow_user.dart';
+import 'package:yemengram/features/profile/domain/usecases/unfollow_user.dart';
 import '../../../../core/app_user/presentation/cubit/current_user_cubit.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/posts/domain/entities/post.dart';
@@ -13,16 +15,23 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final FetchUserProfile _fetchUserProfile;
   final FetchUserPosts _fetchUserPosts;
   final CurrentUserCubit _currentUserCubit;
+  final FollowUser _followUser;
+  final UnfollowUser _unfollowUser;
 
   ProfileBloc({
     required FetchUserProfile fetchUserProfile,
     required FetchUserPosts fetchUserPosts,
     required CurrentUserCubit currentUserCubit,
+    required FollowUser followUser,
+    required UnfollowUser unfollowUser,
   }) : _fetchUserProfile = fetchUserProfile,
        _fetchUserPosts = fetchUserPosts,
        _currentUserCubit = currentUserCubit,
+       _followUser = followUser,
+       _unfollowUser = unfollowUser,
        super(ProfileInitial()) {
     on<ProfileFetchRequested>(_onFetchRequested);
+    on<ProfileFollowToggleRequested>(_onFollowToggleRequested);
   }
 
   Future<void> _onFetchRequested(
@@ -78,6 +87,53 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
             ),
           ),
         );
+      },
+    );
+  }
+
+  Future<void> _onFollowToggleRequested(
+    ProfileFollowToggleRequested event,
+    Emitter<ProfileState> emit,
+  ) async {
+    // We can only alter values if the current layout is already loaded successfully
+    if (state is! ProfileLoadSuccess) return;
+
+    final currentState = state as ProfileLoadSuccess;
+    final previousProfile = currentState.profile;
+
+    // 1. Unpack current state metrics
+    final bool wasFollowing = previousProfile.isFollowing;
+    final int dynamicFollowersCount = wasFollowing
+        ? previousProfile.followersCount - 1
+        : previousProfile.followersCount + 1;
+
+    // 2. Perform optimistic copy mutation
+    final updatedProfile = previousProfile.copyWith(
+      isFollowing: !wasFollowing,
+      followersCount: dynamicFollowersCount,
+    );
+
+    // 3. Instantly emit the updated layout state so UI shifts with zero-latency
+    emit(currentState.copyWith(profile: updatedProfile));
+
+    // 4. Fire explicit execution downstream to the data repository layers
+    final Either<Failure, Unit> result;
+    if (wasFollowing) {
+      result = await _unfollowUser(event.targetUserId);
+    } else {
+      result = await _followUser(event.targetUserId);
+    }
+
+    // 5. Evaluate backend persistence transaction response
+    result.fold(
+      (failure) {
+        // ❌ Rollback: Revert to previous valid profile snapshot data on error
+        emit(currentState.copyWith(profile: previousProfile));
+
+        // Optional: You could append an error message field to your state to trigger a SnackBar
+      },
+      (_) {
+        //  Success: Do nothing! The UI is already correct.
       },
     );
   }
