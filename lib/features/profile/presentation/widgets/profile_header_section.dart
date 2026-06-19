@@ -9,11 +9,13 @@ import '../../domain/entities/user_profile.dart';
 class ProfileHeaderSection extends StatelessWidget {
   final UserProfile profile;
   final bool isMe;
+  final VoidCallback onFollowPressed;
 
   const ProfileHeaderSection({
     super.key,
     required this.profile,
     required this.isMe,
+    required this.onFollowPressed,
   });
 
   @override
@@ -53,9 +55,10 @@ class ProfileHeaderSection extends StatelessWidget {
           // Action Block Buttons
           ProfileActions(
             isMe: isMe,
+            isFollowing: profile.isFollowing,
             onEditPressed: () {},
             onSharePressed: () {},
-            onFollowPressed: () {},
+            onFollowPressed: onFollowPressed,
             onMessagePressed: () {},
           ),
         ],

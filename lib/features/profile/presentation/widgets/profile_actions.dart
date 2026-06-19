@@ -4,6 +4,7 @@ import '../../../../core/theme/theme_extensions.dart';
 
 class ProfileActions extends StatelessWidget {
   final bool isMe;
+  final bool isFollowing;
   final VoidCallback? onEditPressed;
   final VoidCallback? onSharePressed;
   final VoidCallback? onFollowPressed;
@@ -12,6 +13,7 @@ class ProfileActions extends StatelessWidget {
   const ProfileActions({
     super.key,
     required this.isMe,
+    required this.isFollowing,
     this.onEditPressed,
     this.onSharePressed,
     this.onFollowPressed,
@@ -28,8 +30,8 @@ class ProfileActions extends StatelessWidget {
           _ActionButton(label: 'Share Profile', onPressed: onSharePressed),
         ] else ...[
           _ActionButton(
-            label: 'Follow',
-            isPrimary: true,
+            label: isFollowing ? 'Unfollow' : 'Follow',
+            isPrimary: !isFollowing,
             onPressed: onFollowPressed,
           ),
           const SizedBox(width: AppDimensions.sm),

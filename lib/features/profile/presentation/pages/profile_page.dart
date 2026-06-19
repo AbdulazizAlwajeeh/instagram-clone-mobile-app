@@ -10,9 +10,8 @@ import '../widgets/profile_post_grid.dart';
 import '../widgets/profile_tab_delegate.dart';
 
 class ProfilePage extends StatelessWidget {
-  final String? userId;
 
-  const ProfilePage({super.key, this.userId});
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -55,10 +54,16 @@ class ProfilePage extends StatelessWidget {
               slivers: [
                 // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
                 SliverToBoxAdapter(
-                  //TODO: pass the follow button callback
                   child: ProfileHeaderSection(
                     profile: state.profile,
                     isMe: state.isMe,
+                    onFollowPressed: () {
+                      context.read<ProfileBloc>().add(
+                        ProfileFollowToggleRequested(
+                          targetUserId: state.profile.id,
+                        ),
+                      );
+                    },
                   ),
                 ),
 
