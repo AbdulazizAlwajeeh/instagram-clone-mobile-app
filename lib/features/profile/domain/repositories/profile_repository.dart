@@ -15,4 +15,16 @@ abstract class ProfileRepository {
   /// Returns a [ServerFailure] on the left side if media data fetching fails,
   /// or a [List] of [Post] entities on the right side upon a successful query.
   Future<Either<Failure, List<Post>>> getUserPosts(String userId);
+
+  /// Establishes a follow relationship targeting a specific user.
+  ///
+  /// Returns a [ServerFailure] on the left side if the operation fails,
+  /// or a [Unit] value on the right side upon a successful operation.
+  Future<Either<Failure, Unit>> followUser(String targetUserId);
+
+  /// Dissolves an existing follow relationship targeting a specific user.
+  ///
+  /// Returns a [ServerFailure] on the left side if the operation fails,
+  /// or a [Unit] value on the right side upon a successful operation.
+  Future<Either<Failure, Unit>> unfollowUser(String targetUserId);
 }
