@@ -11,6 +11,8 @@ import 'package:yemengram/features/auth/domain/usecases/user_sign_in.dart';
 import 'package:yemengram/features/auth/domain/usecases/user_sign_up.dart';
 import 'package:yemengram/features/auth/domain/usecases/user_sign_out.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:yemengram/features/profile/domain/usecases/follow_user.dart';
+import 'package:yemengram/features/profile/domain/usecases/unfollow_user.dart';
 import 'core/app_user/presentation/cubit/current_user_cubit.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/data/datasources/theme_local_data_source.dart';
@@ -134,12 +136,16 @@ void _initProfile() {
     // Use Cases
     ..registerFactory(() => FetchUserProfile(serviceLocator()))
     ..registerFactory(() => FetchUserPosts(serviceLocator()))
+    ..registerFactory(() => FollowUser(serviceLocator()))
+    ..registerFactory(() => UnfollowUser(serviceLocator()))
     // Bloc
     ..registerFactory(
       () => ProfileBloc(
         fetchUserProfile: serviceLocator(),
         fetchUserPosts: serviceLocator(),
         currentUserCubit: serviceLocator(),
+        followUser: serviceLocator(),
+        unfollowUser: serviceLocator(),
       ),
     );
 }

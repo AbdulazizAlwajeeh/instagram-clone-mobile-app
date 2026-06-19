@@ -10,6 +10,7 @@ import 'package:yemengram/core/presentation/pages/main_layout.dart';
 import 'package:yemengram/features/create_post/presentation/bloc/create_post_bloc.dart';
 import 'package:yemengram/features/feed/presentation/bloc/feed_bloc.dart';
 import 'package:yemengram/features/feed/presentation/pages/feed_page.dart';
+import 'package:yemengram/features/profile/presentation/bloc/profile_event.dart';
 import 'package:yemengram/features/search/presentation/pages/search_page.dart';
 import 'package:yemengram/features/create_post/presentation/pages'
     '/create_post_page.dart';
@@ -48,8 +49,10 @@ class AppRouter {
     builder: (context, state) {
       final targetUserId = state.pathParameters['userId'];
       return BlocProvider(
-        create: (context) => serviceLocator<ProfileBloc>(),
-        child: ProfilePage(userId: targetUserId),
+        create: (context) =>
+            serviceLocator<ProfileBloc>()
+              ..add(ProfileFetchRequested(userId: targetUserId)),
+        child: const ProfilePage(),
       );
     },
   );
@@ -126,8 +129,10 @@ class AppRouter {
               GoRoute(
                 path: profilePath,
                 builder: (context, state) => BlocProvider(
-                  create: (context) => serviceLocator<ProfileBloc>(),
-                  child: ProfilePage(userId: null),
+                  create: (context) =>
+                      serviceLocator<ProfileBloc>()
+                        ..add(const ProfileFetchRequested(userId: null)),
+                  child: const ProfilePage(),
                 ),
                 routes: [
                   // --- Sub-Route: Settings ---
