@@ -11,4 +11,14 @@ abstract class ProfileRemoteDataSource {
   ///
   /// Throws a [ServerException] if a network error or database query failure occurs.
   Future<List<PostModel>> getUserPosts(String userId);
+
+  /// Establishes a follow entry in the database record targeting the provided [targetUserId].
+  ///
+  /// Throws a [ServerException] if a network error or database query failure occurs.
+  Future<void> followUser(String targetUserId);
+
+  /// Dissolves an existing follow entry in the database record targeting the provided [targetUserId].
+  ///
+  /// Throws a [ServerException] if a network error or database query failure occurs.
+  Future<void> unfollowUser(String targetUserId);
 }

@@ -12,11 +12,31 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<UserProfileModel> getUserProfile(String userId) async {
     try {
+      // Fetch current logged-in user
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+
       final response = await _supabaseClient
           .from('profiles')
           .select()
           .eq('id', userId)
           .maybeSingle();
+
+      // Determine if the profile belongs to the logged-in user
+      final bool isMe = userId == currentUserId;
+
+      // If it's not the logged-in user's profile, check the follows table
+      // relationship status
+      bool isFollowingTarget = false;
+      if (!isMe && currentUserId != null) {
+        final followCheck = await _supabaseClient
+            .from('follows')
+            .select('id') // Just grab a minimal field to reduce payload size
+            .eq('follower_id', currentUserId)
+            .eq('following_id', userId)
+            .maybeSingle();
+
+        isFollowingTarget = followCheck != null;
+      }
 
       if (response == null) {
         throw const ServerException(
@@ -24,7 +44,10 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
         );
       }
 
-      return UserProfileModel.fromJson(response);
+      return UserProfileModel.fromJson(
+        response,
+        isFollowing: isFollowingTarget,
+      );
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -42,6 +65,43 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       return (response as List)
           .map((postJson) => PostModel.fromFlatJson(postJson))
           .toList();
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> followUser(String targetUserId) async {
+    try {
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+
+      if (currentUserId == null) {
+        throw const ServerException('User authentication token not found.');
+      }
+
+      await _supabaseClient.from('follows').insert({
+        'follower_id': currentUserId,
+        'following_id': targetUserId,
+      });
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<void> unfollowUser(String targetUserId) async {
+    try {
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+
+      if (currentUserId == null) {
+        throw const ServerException('User authentication token not found.');
+      }
+
+      await _supabaseClient
+          .from('follows')
+          .delete()
+          .eq('follower_id', currentUserId)
+          .eq('following_id', targetUserId);
     } catch (e) {
       throw ServerException(e.toString());
     }
