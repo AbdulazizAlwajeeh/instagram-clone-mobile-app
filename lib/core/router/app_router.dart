@@ -47,9 +47,9 @@ class AppRouter {
     path: dynamicProfileSubPath,
     builder: (context, state) {
       final targetUserId = state.pathParameters['userId'];
-      return ProfilePage(
-        userId: targetUserId,
-        profileBloc: serviceLocator<ProfileBloc>(),
+      return BlocProvider(
+        create: (context) => serviceLocator<ProfileBloc>(),
+        child: ProfilePage(userId: targetUserId),
       );
     },
   );
@@ -125,9 +125,9 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: profilePath,
-                builder: (context, state) => ProfilePage(
-                  userId: null,
-                  profileBloc: serviceLocator<ProfileBloc>(),
+                builder: (context, state) => BlocProvider(
+                  create: (context) => serviceLocator<ProfileBloc>(),
+                  child: ProfilePage(userId: null),
                 ),
                 routes: [
                   // --- Sub-Route: Settings ---

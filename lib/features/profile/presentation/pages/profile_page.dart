@@ -11,73 +11,70 @@ import '../widgets/profile_tab_delegate.dart';
 
 class ProfilePage extends StatelessWidget {
   final String? userId;
-  final ProfileBloc profileBloc;
 
-  const ProfilePage({super.key, this.userId, required this.profileBloc});
+  const ProfilePage({super.key, this.userId});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ProfileBloc>(
-      create: (_) => profileBloc..add(ProfileFetchRequested(userId: userId)),
-      child: Scaffold(
-        appBar: AppBar(
-          title: BlocBuilder<ProfileBloc, ProfileState>(
-            builder: (context, state) {
-              return state is ProfileLoadSuccess
-                  ? Text(state.profile.username)
-                  : Text('');
-            },
-          ),
-          centerTitle: false,
-          actions: [
-            BlocBuilder<ProfileBloc, ProfileState>(
-              builder: (context, state) {
-                if (state is ProfileLoadSuccess && state.isMe) {
-                  return IconButton(
-                    icon: const Icon(Icons.settings_outlined),
-                    tooltip: 'Open Settings',
-                    onPressed: () => context.go(AppRouter.settingsFullPath),
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-          ],
-        ),
-        body: BlocBuilder<ProfileBloc, ProfileState>(
+    return Scaffold(
+      appBar: AppBar(
+        title: BlocBuilder<ProfileBloc, ProfileState>(
           builder: (context, state) {
-            if (state is ProfileLoading || state is ProfileInitial) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (state is ProfileLoadFailure) {
-              return Center(child: Text(state.errorMessage));
-            }
-            if (state is ProfileLoadSuccess) {
-              return CustomScrollView(
-                slivers: [
-                  // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
-                  SliverToBoxAdapter(
-                    child: ProfileHeaderSection(
-                      profile: state.profile,
-                      isMe: state.isMe,
-                    ),
-                  ),
-
-                  // 2. Pinned Layout Tab Bar
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: ProfileTabDelegate(),
-                  ),
-
-                  // 3. Aspect-Locked Post Grid Stub
-                  ProfilePostGrid(posts: state.posts),
-                ],
-              );
-            }
-            return const SizedBox();
+            return state is ProfileLoadSuccess
+                ? Text(state.profile.username)
+                : Text('');
           },
         ),
+        centerTitle: false,
+        actions: [
+          BlocBuilder<ProfileBloc, ProfileState>(
+            builder: (context, state) {
+              if (state is ProfileLoadSuccess && state.isMe) {
+                return IconButton(
+                  icon: const Icon(Icons.settings_outlined),
+                  tooltip: 'Open Settings',
+                  onPressed: () => context.go(AppRouter.settingsFullPath),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
+      ),
+      body: BlocBuilder<ProfileBloc, ProfileState>(
+        builder: (context, state) {
+          if (state is ProfileLoading || state is ProfileInitial) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (state is ProfileLoadFailure) {
+            return Center(child: Text(state.errorMessage));
+          }
+          if (state is ProfileLoadSuccess) {
+            return CustomScrollView(
+              slivers: [
+                // 1. Profile Header Elements (Avatar, Metrics, Bio, Buttons)
+                SliverToBoxAdapter(
+                  //TODO: pass the follow button callback
+                  child: ProfileHeaderSection(
+                    profile: state.profile,
+                    isMe: state.isMe,
+                  ),
+                ),
+
+                // 2. Pinned Layout Tab Bar
+                SliverPersistentHeader(
+                  pinned: true,
+                  delegate: ProfileTabDelegate(),
+                ),
+
+                // 3. Aspect-Locked Post Grid Stub
+                ProfilePostGrid(posts: state.posts),
+              ],
+            );
+          }
+          return const SizedBox();
+        },
       ),
     );
   }
