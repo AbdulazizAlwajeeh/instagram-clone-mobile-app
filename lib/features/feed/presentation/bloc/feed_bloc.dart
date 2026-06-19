@@ -20,14 +20,10 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
        super(const FeedState()) {
     on<FeedFetchInitialPosts>(_onFetchInitialPosts);
     on<FeedFetchNextPage>(_onFetchNextPage);
+    on<FeedRefreshRequested>(_onRefreshRequested);
   }
 
-  Future<void> _onFetchInitialPosts(
-    FeedFetchInitialPosts event,
-    Emitter<FeedState> emit,
-  ) async {
-    emit(state.copyWith(status: FeedStatus.loading, hasReachedMax: false));
-
+  Future<void> _loadInitialPosts({required Emitter<FeedState> emit}) async {
     final currentUserId = _currentUserCubit.state is CurrentUserLoggedIn
         ? (_currentUserCubit.state as CurrentUserLoggedIn).user.id
         : null;
@@ -46,8 +42,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
       GetFollowedUsersPostsParams(
         userId: currentUserId,
         limit: _pageSize,
-        lastPostTimestamp:
-            null, // Initial page forces null to fetch absolute newest entries
+        lastPostTimestamp: null,
       ),
     );
 
@@ -66,6 +61,21 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
         ),
       ),
     );
+  }
+
+  Future<void> _onFetchInitialPosts(
+    FeedFetchInitialPosts event,
+    Emitter<FeedState> emit,
+  ) async {
+    emit(state.copyWith(status: FeedStatus.loading, hasReachedMax: false));
+    await _loadInitialPosts(emit: emit);
+  }
+
+  Future<void> _onRefreshRequested(
+    FeedRefreshRequested event,
+    Emitter<FeedState> emit,
+  ) async {
+    await _loadInitialPosts(emit: emit);
   }
 
   Future<void> _onFetchNextPage(
