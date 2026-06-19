@@ -10,10 +10,14 @@ class UserProfileModel extends UserProfile {
     required super.postsCount,
     required super.followersCount,
     required super.followingCount,
+    required super.isFollowing,
   });
 
   /// Factory constructor to convert raw Supabase database rows into UserProfileModel.
-  factory UserProfileModel.fromJson(Map<String, dynamic> json) {
+  factory UserProfileModel.fromJson(
+    Map<String, dynamic> json, {
+    required bool isFollowing,
+  }) {
     return UserProfileModel(
       id: json['id'] as String,
       username: json['username'] as String? ?? '',
@@ -23,6 +27,7 @@ class UserProfileModel extends UserProfile {
       postsCount: (json['posts_count'] as num?)?.toInt() ?? 0,
       followersCount: (json['followers_count'] as num?)?.toInt() ?? 0,
       followingCount: (json['following_count'] as num?)?.toInt() ?? 0,
+      isFollowing: isFollowing,
     );
   }
 
