@@ -11,7 +11,7 @@ class AppUserModel extends AppUser {
   /// Factory constructor to convert raw Supabase database/auth maps into AppUserModel.
   factory AppUserModel.fromJson(Map<String, dynamic> json) {
     return AppUserModel(
-      id: json['id'] as String,
+      id: json['id'] as String? ?? '',
       email: json['email'] as String? ?? '',
       username:
           json['username'] as String? ??
