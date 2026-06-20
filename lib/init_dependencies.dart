@@ -14,6 +14,13 @@ import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:yemengram/features/profile/domain/usecases/follow_user.dart';
 import 'package:yemengram/features/profile/domain/usecases/unfollow_user.dart';
 import 'core/app_user/presentation/cubit/current_user_cubit.dart';
+import 'core/posts/data/datasoucres/post_detail_remote_data_source.dart';
+import 'core/posts/data/datasoucres/post_detail_remote_data_source_impl.dart';
+import 'core/posts/data/repositories/post_detail_repository_impl.dart';
+import 'core/posts/domain/repositories/post_detail_repository.dart';
+import 'core/posts/domain/usecases/get_post_by_id.dart';
+import 'core/posts/domain/usecases/toggle_lilke_post.dart';
+import 'core/posts/presentation/bloc/post_details_bloc.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/data/datasources/theme_local_data_source.dart';
 import 'core/theme/data/datasources/theme_local_data_source_impl.dart';
@@ -73,6 +80,8 @@ Future<void> initDependencies() async {
   _initFeed();
 
   _initCreatePost();
+
+  _initPostDetail();
 
   // Register Global Core Router Singleton
   serviceLocator.registerSingleton<AppRouter>(
@@ -194,4 +203,34 @@ void _initCreatePost() {
         currentUserCubit: serviceLocator<CurrentUserCubit>(),
       ),
     );
+}
+
+void _initPostDetail() {
+  // 1. Remote Data Source Factory
+  serviceLocator.registerFactory<PostDetailRemoteDataSource>(
+    () => PostDetailRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // 2. Repository Implementation Factory
+  serviceLocator.registerFactory<PostDetailRepository>(
+    () =>
+        PostDetailRepositoryImpl(serviceLocator<PostDetailRemoteDataSource>()),
+  );
+
+  // 3. Domain Use Case Factories
+  serviceLocator.registerFactory(
+    () => GetPostById(serviceLocator<PostDetailRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => ToggleLikePost(serviceLocator<PostDetailRepository>()),
+  );
+
+  // 4. Presentation BLoC Factory
+  // Registered as a factory so each time a user opens a post, a fresh BLoC/state instance is built
+  serviceLocator.registerFactory(
+    () => PostDetailBloc(
+      getPostById: serviceLocator<GetPostById>(),
+      toggleLikePost: serviceLocator<ToggleLikePost>(),
+    ),
+  );
 }

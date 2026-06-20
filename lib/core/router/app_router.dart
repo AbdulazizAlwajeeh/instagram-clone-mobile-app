@@ -19,6 +19,10 @@ import 'package:yemengram/features/profile/presentation/pages/profile_page.dart'
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../init_dependencies.dart';
+import '../posts/presentation/bloc/post_details_bloc.dart';
+import '../posts/presentation/bloc/post_details_event.dart';
+import '../posts/presentation/bloc/post_details_state.dart';
+import '../posts/presentation/pages/view_post_page.dart';
 
 class AppRouter {
   final AuthBloc _authBloc;
@@ -44,6 +48,17 @@ class AppRouter {
 
   static const String dynamicProfileSubPath = 'user/:userId';
 
+  static const String viewPostSubPath = 'post/:postId';
+
+  static String viewPostFullPath(String currentTab, String postId) {
+    // If called from profile tab, it builds: "/profile/post/123"
+    // If called from feed tab, it builds: "/post/123" (since feed path is "/")
+    if (currentTab == '/') {
+      return '/post/$postId';
+    }
+    return '$currentTab/post/$postId';
+  }
+
   final userProfileRoute = GoRoute(
     path: dynamicProfileSubPath,
     builder: (context, state) {
@@ -53,6 +68,45 @@ class AppRouter {
             serviceLocator<ProfileBloc>()
               ..add(ProfileFetchRequested(userId: targetUserId)),
         child: const ProfilePage(),
+      );
+    },
+  );
+
+  GoRoute get viewPostRoute => GoRoute(
+    path: viewPostSubPath,
+    builder: (context, state) {
+      final postId = state.pathParameters['postId']!;
+
+      return BlocProvider<PostDetailBloc>(
+        create: (context) =>
+            serviceLocator<PostDetailBloc>()
+              ..add(PostDetailFetchRequested(postId: postId)),
+        child: BlocBuilder<PostDetailBloc, PostDetailState>(
+          builder: (context, blocState) {
+            final bloc = context.read<PostDetailBloc>();
+
+            final currentPost = switch (blocState) {
+              PostDetailInitial() => null,
+              PostDetailLoading(post: final p) => p,
+              PostDetailSuccess(post: final p) => p,
+              PostDetailFailure(post: final p) => p,
+            };
+
+            return ViewPostPage(
+              isLoading: blocState is PostDetailLoading && currentPost == null,
+              errorMessage: blocState is PostDetailFailure
+                  ? (blocState).errorMessage
+                  : null,
+              post: currentPost,
+              onRefresh: () async {
+                bloc.add(PostDetailRefreshRequested(postId: postId));
+                await bloc.stream.firstWhere((s) => s is! PostDetailLoading);
+              },
+              onLikeTapped: () =>
+                  bloc.add(PostDetailLikeTapped(postId: postId)),
+            );
+          },
+        ),
       );
     },
   );
@@ -91,7 +145,7 @@ class AppRouter {
                 path: feedPath,
                 builder: (context, state) =>
                     FeedPage(feedBloc: serviceLocator<FeedBloc>()),
-                routes: [userProfileRoute],
+                routes: [userProfileRoute, viewPostRoute],
               ),
             ],
           ),
@@ -100,7 +154,7 @@ class AppRouter {
               GoRoute(
                 path: searchPath,
                 builder: (context, state) => const SearchPage(),
-                routes: [userProfileRoute],
+                routes: [userProfileRoute, viewPostRoute],
               ),
             ],
           ),
@@ -135,6 +189,7 @@ class AppRouter {
                   child: const ProfilePage(),
                 ),
                 routes: [
+                  viewPostRoute,
                   // --- Sub-Route: Settings ---
                   // Declared as a child of profile so it stays inside the profile tab shell
                   GoRoute(
