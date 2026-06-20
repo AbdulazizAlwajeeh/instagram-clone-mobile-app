@@ -8,6 +8,7 @@ class Post {
   final int likesCount;
   final int commentsCount;
   final DateTime createdAt;
+  final bool isLiked;
 
   const Post({
     required this.id,
@@ -17,5 +18,6 @@ class Post {
     required this.likesCount,
     required this.commentsCount,
     required this.createdAt,
+    required this.isLiked,
   });
 }

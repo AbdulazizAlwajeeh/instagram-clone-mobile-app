@@ -11,11 +11,20 @@ class PostModel extends Post {
     required super.likesCount,
     required super.commentsCount,
     required super.createdAt,
+    required super.isLiked,
   });
 
   /// Factory constructor to create a PostModel from a Supabase JSON map
   factory PostModel.fromJson(Map<String, dynamic> json) {
     final userData = json['profiles'] as Map<String, dynamic>? ?? const {};
+
+    // Safe evaluation of the nested likes join count array
+    final likesList = json['likes'] as List<dynamic>? ?? const [];
+    final bool userHasLiked =
+        likesList.isNotEmpty &&
+        likesList.first['count'] != null &&
+        likesList.first['count'] > 0;
+
     return PostModel(
       id: json['id'] as String,
       author: AppUserModel.fromJson(userData),
@@ -26,6 +35,7 @@ class PostModel extends Post {
       commentsCount: json['comments_count'] as int,
       // Supabase returns timestamptz as an ISO 8601 string, so we parse it here
       createdAt: DateTime.parse(json['created_at'] as String),
+      isLiked: userHasLiked,
     );
   }
 
@@ -41,6 +51,7 @@ class PostModel extends Post {
       likesCount: json['likes_count'] as int,
       commentsCount: json['comments_count'] as int,
       createdAt: DateTime.parse(json['created_at'] as String),
+      isLiked: json['is_liked'] ?? false,
     );
   }
 
