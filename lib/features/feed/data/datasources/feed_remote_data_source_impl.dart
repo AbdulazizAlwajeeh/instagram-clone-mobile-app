@@ -29,10 +29,13 @@ class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
           follows!following_id!inner (
             follower_id
           )
-        )
+        ),
+        likes:likes(count)
       ''')
           // Filter the deeply nested follow table on the server side
-          .eq('profiles.follows.follower_id', userId);
+          .eq('profiles.follows.follower_id', userId)
+          // Filters the nested likes sub-query down to ONLY the current viewer's ID
+          .eq('likes.user_id', userId);
 
       // ONLY append the cursor constraint if it's page 2 or deeper
       if (lastPostTimestamp != null) {

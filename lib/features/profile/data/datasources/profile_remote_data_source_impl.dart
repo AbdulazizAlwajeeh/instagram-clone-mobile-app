@@ -56,10 +56,21 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   @override
   Future<List<PostModel>> getUserPosts(String userId) async {
     try {
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+
       final response = await _supabaseClient
           .from('posts')
-          .select()
-          .eq('user_id', userId)
+          .select('''
+      *,
+      profiles (
+        username,
+        avatar_url
+      ),
+      likes:likes(count)
+    ''')
+          .eq('user_id', userId) // Filters for the targeted profile's posts
+          // Filters the nested likes sub-query down to ONLY the current viewer's ID
+          .eq('likes.user_id', currentUserId ?? '')
           .order('created_at', ascending: false);
 
       return (response as List)
