@@ -20,6 +20,7 @@ class PostDetailRemoteDataSourceImpl implements PostDetailRemoteDataSource {
           .select('''
         *,
         profiles (
+          id,
           username,
           avatar_url
         ),

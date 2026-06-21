@@ -106,6 +106,30 @@ class AppRouter {
               },
               onLikeTapped: () =>
                   bloc.add(PostDetailLikeTapped(postId: postId)),
+              onProfileTapped: currentPost == null
+                  ? null
+                  : () {
+                      // 1. Get the exact active location (e.g., '/explore/post/123' or '/post/123')
+                      final currentLocation = state.matchedLocation;
+
+                      // 2. Find where the post sub-path begins
+                      final postIndex = currentLocation.indexOf('/post/');
+
+                      // 3. Extract just the base tab branch path
+                      // If postIndex is -1, it means we aren't in a sub-route, fallback to root '/'
+                      final String baseTabPath = postIndex != -1
+                          ? currentLocation.substring(0, postIndex)
+                          : '';
+
+                      // 4. Safely join the clean base path with the target user sub-path
+                      // If baseTabPath is empty (Feed tab root), it cleanly makes '/user/XYZ'
+                      // If baseTabPath is '/explore', it cleanly makes '/explore/user/XYZ'
+                      final profilePath =
+                          '$baseTabPath/user/${currentPost.author.id}';
+
+                      // Using push avoids resetting or misaligning the current branch configuration
+                      context.push(profilePath);
+                    },
             );
           },
         ),

@@ -11,6 +11,7 @@ class ViewPostPage extends StatelessWidget {
   final VoidCallback? onCommentTapped;
   final VoidCallback? onShareTapped;
   final VoidCallback? onSaveTapped;
+  final VoidCallback? onProfileTapped;
 
   const ViewPostPage({
     super.key,
@@ -22,6 +23,7 @@ class ViewPostPage extends StatelessWidget {
     this.onCommentTapped,
     this.onShareTapped,
     this.onSaveTapped,
+    this.onProfileTapped,
   });
 
   @override
@@ -76,7 +78,7 @@ class ViewPostPage extends StatelessWidget {
         likesCount: post.likesCount ?? 0,
         isLiked: post.isLiked,
         timeAgo: '${post.createdAt.hour}:${post.createdAt.minute}',
-        onProfileTapped: () {},
+        onProfileTapped: onProfileTapped ?? () {},
         // Handled locally or exposed if needed
         onLikeTapped: onLikeTapped ?? () {},
         onCommentTapped: onCommentTapped ?? () {},
