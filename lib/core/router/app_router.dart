@@ -149,7 +149,25 @@ class AppRouter {
     redirect: (BuildContext context, GoRouterState state) {
       final loggedIn = _authBloc.state is AuthSuccess;
 
-      return loggedIn ? null : signInPath;
+      // Check if the current route is either sign-in or sign-up
+      final isAtAuthPage =
+          state.matchedLocation == signInPath ||
+          state.matchedLocation == signUpPath;
+
+      // 1. If NOT logged in
+      if (!loggedIn) {
+        // If they are already trying to view sign-in or sign-up, let them stay
+        return isAtAuthPage ? null : signInPath;
+      }
+
+      // 2. If LOGGED in
+      if (isAtAuthPage) {
+        // Bounce them to the default main app page if they try to visit login/signup
+        return feedPath;
+      }
+
+      // Default: Let them go where they intended
+      return null;
     },
     routes: [
       GoRoute(
@@ -273,7 +291,6 @@ class GoRouterRefreshStream extends ChangeNotifier {
   late final StreamSubscription<dynamic> _subscription;
 
   GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
     _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
   }
 
