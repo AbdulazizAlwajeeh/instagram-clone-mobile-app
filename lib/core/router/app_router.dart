@@ -11,11 +11,13 @@ import 'package:yemengram/features/create_post/presentation/bloc/create_post_blo
 import 'package:yemengram/features/feed/presentation/bloc/feed_bloc.dart';
 import 'package:yemengram/features/feed/presentation/pages/feed_page.dart';
 import 'package:yemengram/features/profile/presentation/bloc/profile_event.dart';
-import 'package:yemengram/features/search/presentation/pages/search_page.dart';
+import 'package:yemengram/features/explore/presentation/pages/explore_page'
+    '.dart';
 import 'package:yemengram/features/create_post/presentation/pages'
     '/create_post_page.dart';
 import 'package:yemengram/features/chat/presentation/pages/chat_page.dart';
 import 'package:yemengram/features/profile/presentation/pages/profile_page.dart';
+import '../../features/explore/presentation/bloc/explore_bloc.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../init_dependencies.dart';
@@ -35,7 +37,7 @@ class AppRouter {
 
   // Tab path constants
   static const String feedPath = '/';
-  static const String searchPath = '/search';
+  static const String explorePath = '/explore';
   static const String createPostPath = '/create-create_post';
   static const String chatPath = '/chat';
   static const String profilePath = '/profile';
@@ -152,8 +154,43 @@ class AppRouter {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: searchPath,
-                builder: (context, state) => const SearchPage(),
+                path: explorePath,
+                builder: (context, state) {
+                  return BlocProvider<ExploreBloc>(
+                    create: (context) =>
+                        serviceLocator<ExploreBloc>()
+                          ..add(const ExploreFetchRequested()),
+                    child: BlocBuilder<ExploreBloc, ExploreState>(
+                      builder: (context, blocState) {
+                        final bloc = context.read<ExploreBloc>();
+
+                        final currentPosts = switch (blocState) {
+                          ExploreInitial() => null,
+                          ExploreLoading(posts: final p) => p,
+                          ExploreSuccess(posts: final p) => p,
+                          ExploreFailure(posts: final p) => p,
+                        };
+
+                        return ExplorePage(
+                          isLoading:
+                              blocState is ExploreInitial ||
+                              (blocState is ExploreLoading &&
+                                  currentPosts == null),
+                          errorMessage: blocState is ExploreFailure
+                              ? (blocState).errorMessage
+                              : null,
+                          posts: currentPosts,
+                          onRefresh: () async {
+                            bloc.add(const ExploreRefreshRequested());
+                            await bloc.stream.firstWhere(
+                              (s) => s is! ExploreLoading,
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  );
+                },
                 routes: [userProfileRoute, viewPostRoute],
               ),
             ],

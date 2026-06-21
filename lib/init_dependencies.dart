@@ -33,6 +33,12 @@ import 'features/create_post/data/repositories/create_post_repository_impl.dart'
 import 'features/create_post/domain/repositories/create_post_repository.dart';
 import 'features/create_post/domain/usecases/create_post_usecase.dart';
 import 'features/create_post/presentation/bloc/create_post_bloc.dart';
+import 'features/explore/data/datasources/explore_remote_data_source.dart';
+import 'features/explore/data/datasources/explore_remote_data_source_impl.dart';
+import 'features/explore/data/repositories/explore_repository_impl.dart';
+import 'features/explore/domain/repositories/explore_repository.dart';
+import 'features/explore/domain/usecases/get_all_posts.dart';
+import 'features/explore/presentation/bloc/explore_bloc.dart';
 import 'features/feed/data/datasources/feed_remote_data_source.dart';
 import 'features/feed/data/datasources/feed_remote_data_source_impl.dart';
 import 'features/feed/data/repositories/feed_repository_impl.dart';
@@ -82,6 +88,8 @@ Future<void> initDependencies() async {
   _initCreatePost();
 
   _initPostDetail();
+
+  _initExplore();
 
   // Register Global Core Router Singleton
   serviceLocator.registerSingleton<AppRouter>(
@@ -232,5 +240,28 @@ void _initPostDetail() {
       getPostById: serviceLocator<GetPostById>(),
       toggleLikePost: serviceLocator<ToggleLikePost>(),
     ),
+  );
+}
+
+void _initExplore() {
+  // 1. Remote Data Source Factory
+  serviceLocator.registerFactory<ExploreRemoteDataSource>(
+    () => ExploreRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // 2. Repository Implementation Factory
+  serviceLocator.registerFactory<ExploreRepository>(
+    () => ExploreRepositoryImpl(serviceLocator<ExploreRemoteDataSource>()),
+  );
+
+  // 3. Domain Use Case Factories
+  serviceLocator.registerFactory(
+    () => GetAllPosts(serviceLocator<ExploreRepository>()),
+  );
+
+  // 4. Presentation BLoC Factory
+  // Registered as a factory so each time a user opens explore, a fresh BLoC/state instance is built
+  serviceLocator.registerFactory(
+    () => ExploreBloc(getAllPosts: serviceLocator<GetAllPosts>()),
   );
 }
