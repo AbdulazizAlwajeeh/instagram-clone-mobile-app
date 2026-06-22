@@ -1,26 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:yemengram/core/router/app_router.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
-import '../../../../core/posts/domain/entities/post.dart';
+import '../bloc/explore_bloc.dart';
 
 class ExplorePage extends StatelessWidget {
-  final bool isLoading;
-  final String? errorMessage;
-  final List<Post>? posts;
-  final Future<void> Function() onRefresh;
-
-  const ExplorePage({
-    super.key,
-    required this.isLoading,
-    required this.errorMessage,
-    required this.posts,
-    required this.onRefresh,
-  });
+  const ExplorePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final bloc = context.read<ExploreBloc>();
+
     final blockSurfaceColor = context.colorScheme.brightness == Brightness.dark
         ? const Color(0xFF1E293B) // Slate 800
         : const Color(0xFFE2E8F0); // Slate 200
@@ -51,21 +43,35 @@ class ExplorePage extends StatelessWidget {
               ),
             ),
 
-            // 2. Main Content Area (Handling Loading, Error, and Grid Data)
+            // 2. Main Content Area Driven dynamically by the local BlocBuilder
             Expanded(
-              child: Builder(
-                builder: (context) {
+              child: BlocBuilder<ExploreBloc, ExploreState>(
+                builder: (context, state) {
+                  final currentPosts = switch (state) {
+                    ExploreInitial() => null,
+                    ExploreLoading(posts: final p) => p,
+                    ExploreSuccess(posts: final p) => p,
+                    ExploreFailure(posts: final p) => p,
+                  };
+
+                  final bool isLoading =
+                      state is ExploreInitial ||
+                      (state is ExploreLoading && currentPosts == null);
+                  final String? errorMessage = state is ExploreFailure
+                      ? state.errorMessage
+                      : null;
+
                   if (isLoading) {
                     return const Center(child: CircularProgressIndicator());
                   }
 
                   if (errorMessage != null &&
-                      (posts == null || posts!.isEmpty)) {
+                      (currentPosts == null || currentPosts.isEmpty)) {
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.all(AppDimensions.md),
                         child: Text(
-                          errorMessage!,
+                          errorMessage,
                           textAlign: TextAlign.center,
                           style: TextStyle(color: context.colorScheme.error),
                         ),
@@ -73,14 +79,18 @@ class ExplorePage extends StatelessWidget {
                     );
                   }
 
-                  if (posts == null || posts!.isEmpty) {
+                  if (currentPosts == null || currentPosts.isEmpty) {
                     return const Center(
                       child: Text('No posts found for exploration.'),
                     );
                   }
 
                   return RefreshIndicator(
-                    onRefresh: onRefresh,
+                    onRefresh: () async {
+                      bloc.add(const ExploreRefreshRequested());
+                      // Synchronize stream transitions before dismissing the swipe animation tracker
+                      await bloc.stream.firstWhere((s) => s is! ExploreLoading);
+                    },
                     child: GridView.builder(
                       gridDelegate:
                           const SliverGridDelegateWithFixedCrossAxisCount(
@@ -89,16 +99,16 @@ class ExplorePage extends StatelessWidget {
                             crossAxisSpacing: 2.0,
                             childAspectRatio: 1.0,
                           ),
-                      itemCount: posts!.length,
+                      itemCount: currentPosts.length,
                       itemBuilder: (context, index) {
-                        final post = posts![index];
+                        final post = currentPosts[index];
 
                         return GestureDetector(
                           onTap: () {
                             context.go(
                               AppRouter.viewPostFullPath(
                                 AppRouter.explorePath,
-                                posts![index].id,
+                                post.id,
                               ),
                             );
                           },

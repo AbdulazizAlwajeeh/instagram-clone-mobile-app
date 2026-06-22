@@ -152,35 +152,7 @@ class AppRouter {
                     create: (context) =>
                         serviceLocator<ExploreBloc>()
                           ..add(const ExploreFetchRequested()),
-                    child: BlocBuilder<ExploreBloc, ExploreState>(
-                      builder: (context, blocState) {
-                        final bloc = context.read<ExploreBloc>();
-
-                        final currentPosts = switch (blocState) {
-                          ExploreInitial() => null,
-                          ExploreLoading(posts: final p) => p,
-                          ExploreSuccess(posts: final p) => p,
-                          ExploreFailure(posts: final p) => p,
-                        };
-
-                        return ExplorePage(
-                          isLoading:
-                              blocState is ExploreInitial ||
-                              (blocState is ExploreLoading &&
-                                  currentPosts == null),
-                          errorMessage: blocState is ExploreFailure
-                              ? (blocState).errorMessage
-                              : null,
-                          posts: currentPosts,
-                          onRefresh: () async {
-                            bloc.add(const ExploreRefreshRequested());
-                            await bloc.stream.firstWhere(
-                              (s) => s is! ExploreLoading,
-                            );
-                          },
-                        );
-                      },
-                    ),
+                    child: const ExplorePage(),
                   );
                 },
                 routes: [userProfileRoute, viewPostRoute],
