@@ -30,12 +30,12 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       if (!isMe && currentUserId != null) {
         final followCheck = await _supabaseClient
             .from('follows')
-            .select('id') // Just grab a minimal field to reduce payload size
+            .select('') // Just grab a count to reduce payload
             .eq('follower_id', currentUserId)
             .eq('following_id', userId)
-            .maybeSingle();
+            .count(CountOption.exact);
 
-        isFollowingTarget = followCheck != null;
+        isFollowingTarget = followCheck.count > 0;
       }
 
       if (response == null) {
