@@ -6,7 +6,7 @@ class AuthHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Text(
-      'Instagram',
+      'Yemengram',
       textAlign: TextAlign.center,
       style: TextStyle(fontSize: 42, fontWeight: FontWeight.bold),
     );
