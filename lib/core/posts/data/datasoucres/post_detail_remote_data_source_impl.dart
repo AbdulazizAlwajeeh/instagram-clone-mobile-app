@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/posts/domain/entities/post.dart';
+import '../models/comment_model.dart';
 import '../models/post_model.dart';
 import 'post_detail_remote_data_source.dart';
 
@@ -70,6 +71,67 @@ class PostDetailRemoteDataSourceImpl implements PostDetailRemoteDataSource {
           'user_id': currentUserId,
         });
       }
+    } on PostgrestException catch (error) {
+      throw ServerException(error.message);
+    } catch (error) {
+      throw ServerException(error.toString());
+    }
+  }
+
+  @override
+  Future<List<CommentModel>> getPostComments(String postId) async {
+    try {
+      final List<dynamic> data = await _supabaseClient
+          .from('comments')
+          .select('''
+            id,
+            post_id,
+            user_id,
+            message,
+            created_at,
+            profiles (
+              username,
+              avatar_url
+            )
+          ''')
+          .eq('post_id', postId)
+          .order('created_at', ascending: false);
+      return data.map((commentJson) {
+        final profile = commentJson['profiles'] as Map<String, dynamic>?;
+
+        return CommentModel.fromJson({
+          'id': commentJson['id'],
+          'post_id': commentJson['post_id'],
+          'user_id': commentJson['user_id'],
+          'message': commentJson['message'],
+          'created_at': commentJson['created_at'],
+          'username': profile?['username'] ?? 'unknown_user',
+          'avatar_url': profile?['avatar_url'] ?? '',
+        });
+      }).toList();
+    } on PostgrestException catch (error) {
+      throw ServerException(error.message);
+    } catch (error) {
+      throw ServerException(error.toString());
+    }
+  }
+
+  @override
+  Future<void> addComment({
+    required String postId,
+    required String text,
+  }) async {
+    try {
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+      if (currentUserId == null) {
+        throw const ServerException('User authentication session not found.');
+      }
+
+      await _supabaseClient.from('comments').insert({
+        'post_id': postId,
+        'user_id': currentUserId,
+        'message': text,
+      });
     } on PostgrestException catch (error) {
       throw ServerException(error.message);
     } catch (error) {
