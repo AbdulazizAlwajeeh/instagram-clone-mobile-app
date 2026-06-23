@@ -3,6 +3,7 @@ import 'package:meta/meta.dart';
 @immutable
 sealed class PostDetailEvent {
   final String postId;
+
   const PostDetailEvent(this.postId);
 }
 
@@ -16,4 +17,16 @@ class PostDetailRefreshRequested extends PostDetailEvent {
 
 class PostDetailLikeTapped extends PostDetailEvent {
   const PostDetailLikeTapped({required String postId}) : super(postId);
+}
+
+class PostDetailCommentsFetchRequested extends PostDetailEvent {
+  const PostDetailCommentsFetchRequested({required String postId})
+    : super(postId);
+}
+
+class PostDetailCommentSubmitted extends PostDetailEvent {
+  final String text;
+
+  const PostDetailCommentSubmitted({required String postId, required this.text})
+    : super(postId);
 }

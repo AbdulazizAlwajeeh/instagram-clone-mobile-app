@@ -20,4 +20,26 @@ class Post {
     required this.createdAt,
     required this.isLiked,
   });
+
+  Post copyWith({
+    String? id,
+    AppUser? author,
+    String? Function()? caption, // Allows explicitly setting caption to null
+    String? mediaUrl,
+    int? likesCount,
+    int? commentsCount,
+    DateTime? createdAt,
+    bool? isLiked,
+  }) {
+    return Post(
+      id: id ?? this.id,
+      author: author ?? this.author,
+      caption: caption != null ? caption() : this.caption,
+      mediaUrl: mediaUrl ?? this.mediaUrl,
+      likesCount: likesCount ?? this.likesCount,
+      commentsCount: commentsCount ?? this.commentsCount,
+      createdAt: createdAt ?? this.createdAt,
+      isLiked: isLiked ?? this.isLiked,
+    );
+  }
 }
