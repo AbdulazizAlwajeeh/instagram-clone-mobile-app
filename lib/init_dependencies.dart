@@ -2,6 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:yemengram/core/posts/domain/usecases/add_comment.dart';
+import 'package:yemengram/core/posts/domain/usecases/get_post_comments.dart';
 import 'package:yemengram/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:yemengram/features/auth/data/datasources/auth_remote_data_source_impl.dart';
 import 'package:yemengram/features/auth/data/repositories/auth_repository_impl.dart';
@@ -233,12 +235,21 @@ void _initPostDetail() {
     () => ToggleLikePost(serviceLocator<PostDetailRepository>()),
   );
 
+  serviceLocator.registerFactory(
+    () => GetPostComments(serviceLocator<PostDetailRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => AddComment(serviceLocator<PostDetailRepository>()),
+  );
+
   // 4. Presentation BLoC Factory
   // Registered as a factory so each time a user opens a post, a fresh BLoC/state instance is built
   serviceLocator.registerFactory(
     () => PostDetailBloc(
       getPostById: serviceLocator<GetPostById>(),
       toggleLikePost: serviceLocator<ToggleLikePost>(),
+      getPostComments: serviceLocator<GetPostComments>(),
+      addComment: serviceLocator<AddComment>(),
     ),
   );
 }
