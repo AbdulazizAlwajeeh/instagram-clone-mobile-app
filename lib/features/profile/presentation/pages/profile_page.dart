@@ -27,7 +27,10 @@ class ProfilePage extends StatelessWidget {
         actions: [
           BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, state) {
-              if (state is ProfileLoadSuccess && state.isMe) {
+              if (state is ProfileLoadSuccess &&
+                  state.isMe &&
+                  GoRouterState.of(context).matchedLocation ==
+                      AppRouter.profilePath) {
                 return IconButton(
                   icon: const Icon(Icons.settings_outlined),
                   tooltip: 'Open Settings',
@@ -66,6 +69,17 @@ class ProfilePage extends StatelessWidget {
                     child: ProfileHeaderSection(
                       profile: state.profile,
                       isMe: state.isMe,
+                      onEditPressed: () async {
+                        final profileUpdated = await context.push<bool>(
+                          AppRouter.editProfileFullPath,
+                          extra: state.profile,
+                        );
+                        if (profileUpdated == true && context.mounted) {
+                          context.read<ProfileBloc>().add(
+                            const ProfileRefreshRequested(userId: null),
+                          );
+                        }
+                      },
                       onFollowPressed: () {
                         context.read<ProfileBloc>().add(
                           ProfileFollowToggleRequested(

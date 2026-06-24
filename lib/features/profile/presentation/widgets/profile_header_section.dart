@@ -10,12 +10,14 @@ class ProfileHeaderSection extends StatelessWidget {
   final UserProfile profile;
   final bool isMe;
   final VoidCallback onFollowPressed;
+  final VoidCallback onEditPressed;
 
   const ProfileHeaderSection({
     super.key,
     required this.profile,
     required this.isMe,
     required this.onFollowPressed,
+    required this.onEditPressed,
   });
 
   @override
@@ -56,8 +58,7 @@ class ProfileHeaderSection extends StatelessWidget {
           ProfileActions(
             isMe: isMe,
             isFollowing: profile.isFollowing,
-            onEditPressed: () {},
-            onSharePressed: () {},
+            onEditPressed: onEditPressed,
             onFollowPressed: onFollowPressed,
             onMessagePressed: () {},
           ),

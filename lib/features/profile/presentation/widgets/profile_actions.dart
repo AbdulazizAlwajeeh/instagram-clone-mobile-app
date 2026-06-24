@@ -6,7 +6,6 @@ class ProfileActions extends StatelessWidget {
   final bool isMe;
   final bool isFollowing;
   final VoidCallback? onEditPressed;
-  final VoidCallback? onSharePressed;
   final VoidCallback? onFollowPressed;
   final VoidCallback? onMessagePressed;
 
@@ -15,7 +14,6 @@ class ProfileActions extends StatelessWidget {
     required this.isMe,
     required this.isFollowing,
     this.onEditPressed,
-    this.onSharePressed,
     this.onFollowPressed,
     this.onMessagePressed,
   });
@@ -27,7 +25,6 @@ class ProfileActions extends StatelessWidget {
         if (isMe) ...[
           _ActionButton(label: 'Edit Profile', onPressed: onEditPressed),
           const SizedBox(width: AppDimensions.sm),
-          _ActionButton(label: 'Share Profile', onPressed: onSharePressed),
         ] else ...[
           _ActionButton(
             label: isFollowing ? 'Unfollow' : 'Follow',
