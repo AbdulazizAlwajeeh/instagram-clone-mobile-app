@@ -27,4 +27,18 @@ abstract class ProfileRepository {
   /// Returns a [ServerFailure] on the left side if the operation fails,
   /// or a [Unit] value on the right side upon a successful operation.
   Future<Either<Failure, Unit>> unfollowUser(String targetUserId);
+
+  /// Updates an existing user profile's details in the database.
+  ///
+  /// Returns a [Failure] on the left side if the modification fails,
+  /// or a [Unit] value on the right side upon a successful update operation.
+  Future<Either<Failure, Unit>> editProfile({
+    String? username,
+    String? fullName,
+    String? bio,
+    dynamic imageFile,
+  });
+
+  /// Verifies whether the specified [username] is free to use or already claimed.
+  Future<Either<Failure, bool>> checkUsernameAvailability(String username);
 }
