@@ -117,4 +117,75 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
       throw ServerException(e.toString());
     }
   }
+
+  @override
+  Future<void> editProfile({
+    String? username,
+    String? fullName,
+    String? bio,
+    dynamic imageFile,
+  }) async {
+    try {
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+      if (currentUserId == null) {
+        throw const ServerException('User is not authenticated.');
+      }
+      final Map<String, dynamic> updateData = {};
+      if (username != null) updateData['username'] = username;
+      if (fullName != null) updateData['full_name'] = fullName;
+      if (bio != null) updateData['bio'] = bio;
+
+      if (imageFile != null) {
+        // Convert to raw bytes
+        final fileBytes = await imageFile.readAsBytes();
+
+        // Collision-safe naming formula
+        final String timestamp = DateTime.now().microsecondsSinceEpoch
+            .toString();
+        final String uniqueId = imageFile.path.hashCode.abs().toString();
+
+        // Keep files separated in distinct, user-specific directory folders
+        final String storagePath = '$currentUserId/${timestamp}_$uniqueId.jpg';
+
+        // Push raw asset binary stream straight to the storage bucket
+        await _supabaseClient.storage
+            .from('avatars')
+            .uploadBinary(storagePath, fileBytes);
+
+        // Extract public URL to pass to your profile table
+        final String publicUrl = _supabaseClient.storage
+            .from('avatars')
+            .getPublicUrl(storagePath);
+
+        updateData['avatar_url'] = publicUrl;
+      }
+
+      // Only make the database call if there is actual data to modify
+      if (updateData.isNotEmpty) {
+        await _supabaseClient
+            .from('profiles')
+            .update(updateData)
+            .eq('id', currentUserId);
+      }
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
+
+  @override
+  Future<bool> checkUsernameAvailability(String username) async {
+    try {
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+      final response = await _supabaseClient
+          .from('profiles')
+          .select('username')
+          .eq('username', username.trim())
+          .neq('id', currentUserId ?? '');
+
+      // If the list is empty, the username is available (true)
+      return (response as List).isEmpty;
+    } catch (e) {
+      throw ServerException(e.toString());
+    }
+  }
 }

@@ -59,4 +59,42 @@ class ProfileRepositoryImpl implements ProfileRepository {
       return Left(ServerFailure(e.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> editProfile({
+    String? username,
+    String? fullName,
+    String? bio,
+    dynamic imageFile,
+  }) async {
+    try {
+      await _remoteDataSource.editProfile(
+        username: username,
+        fullName: fullName,
+        bio: bio,
+        imageFile: imageFile,
+      );
+      return const Right(unit);
+    } on ServerException catch (exception) {
+      return Left(ServerFailure(exception.message));
+    } catch (error) {
+      return Left(ServerFailure(error.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> checkUsernameAvailability(
+    String username,
+  ) async {
+    try {
+      final isAvailable = await _remoteDataSource.checkUsernameAvailability(
+        username,
+      );
+      return Right(isAvailable);
+    } on ServerException catch (exception) {
+      return Left(ServerFailure(exception.message));
+    } catch (error) {
+      return Left(ServerFailure(error.toString()));
+    }
+  }
 }

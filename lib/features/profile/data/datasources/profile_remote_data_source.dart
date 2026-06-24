@@ -21,4 +21,17 @@ abstract class ProfileRemoteDataSource {
   ///
   /// Throws a [ServerException] if a network error or database query failure occurs.
   Future<void> unfollowUser(String targetUserId);
+
+  /// Modifies an existing user profile row in the database.
+  ///
+  /// Throws a [ServerException] if the update fails or a database error occurs.
+  Future<void> editProfile({
+    String? username,
+    String? fullName,
+    String? bio,
+    dynamic imageFile,
+  });
+
+  /// Checks if a [username] is already claimed by another user record.
+  Future<bool> checkUsernameAvailability(String username);
 }
