@@ -10,12 +10,15 @@ import 'package:yemengram/core/presentation/pages/main_layout.dart';
 import 'package:yemengram/features/create_post/presentation/bloc/create_post_bloc.dart';
 import 'package:yemengram/features/feed/presentation/bloc/feed_bloc.dart';
 import 'package:yemengram/features/feed/presentation/pages/feed_page.dart';
+import 'package:yemengram/features/profile/domain/entities/user_profile.dart';
+import 'package:yemengram/features/profile/presentation/bloc/edit_profile_bloc.dart';
 import 'package:yemengram/features/profile/presentation/bloc/profile_event.dart';
 import 'package:yemengram/features/explore/presentation/pages/explore_page'
     '.dart';
 import 'package:yemengram/features/create_post/presentation/pages'
     '/create_post_page.dart';
 import 'package:yemengram/features/chat/presentation/pages/chat_page.dart';
+import 'package:yemengram/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:yemengram/features/profile/presentation/pages/profile_page.dart';
 import '../../features/explore/presentation/bloc/explore_bloc.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
@@ -40,6 +43,8 @@ class AppRouter {
   static const String createPostPath = '/create-create_post';
   static const String chatPath = '/chat';
   static const String profilePath = '/profile';
+  static const String editProfilePath = 'edit';
+  static const String editProfileFullPath = '/profile/edit';
 
   // Sub-route path constants
   static const String settingsPath =
@@ -196,6 +201,13 @@ class AppRouter {
                   GoRoute(
                     path: settingsPath,
                     builder: (context, state) => const SettingsPage(),
+                  ),
+                  GoRoute(
+                    path: editProfilePath,
+                    builder: (context, state) => BlocProvider<EditProfileBloc>(
+                      create: (context) => serviceLocator<EditProfileBloc>(),
+                      child: EditProfilePage(user: state.extra as UserProfile),
+                    ),
                   ),
                 ],
               ),

@@ -51,8 +51,11 @@ import 'features/profile/data/datasources/profile_remote_data_source.dart';
 import 'features/profile/data/datasources/profile_remote_data_source_impl.dart';
 import 'features/profile/data/repositories/profile_repository_impl.dart';
 import 'features/profile/domain/repositories/profile_repository.dart';
+import 'features/profile/domain/usecases/check_username_availability.dart';
+import 'features/profile/domain/usecases/edit_profile.dart';
 import 'features/profile/domain/usecases/fetch_user_posts.dart';
 import 'features/profile/domain/usecases/fetch_user_profile.dart';
+import 'features/profile/presentation/bloc/edit_profile_bloc.dart';
 import 'features/profile/presentation/bloc/profile_bloc.dart';
 
 final serviceLocator = GetIt.instance;
@@ -157,6 +160,8 @@ void _initProfile() {
     ..registerFactory(() => FetchUserPosts(serviceLocator()))
     ..registerFactory(() => FollowUser(serviceLocator()))
     ..registerFactory(() => UnfollowUser(serviceLocator()))
+    ..registerFactory(() => CheckUsernameAvailability(serviceLocator()))
+    ..registerFactory(() => EditProfile(serviceLocator()))
     // Bloc
     ..registerFactory(
       () => ProfileBloc(
@@ -165,6 +170,12 @@ void _initProfile() {
         currentUserCubit: serviceLocator(),
         followUser: serviceLocator(),
         unfollowUser: serviceLocator(),
+      ),
+    )
+    ..registerFactory(
+      () => EditProfileBloc(
+        editProfile: serviceLocator(),
+        checkUsernameAvailability: serviceLocator(),
       ),
     );
 }
