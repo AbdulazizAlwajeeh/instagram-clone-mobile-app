@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/posts/presentation/widgets/post_card.dart';
+import '../../domain/entities/comment.dart';
 import '../bloc/post_details_bloc.dart';
 import '../bloc/post_details_event.dart';
 import '../bloc/post_details_state.dart';
+import '../widgets/comment_sheet_content.dart';
 
-/// A pure presentation shell that remains agnostic of state-management tools.
 class ViewPostPage extends StatelessWidget {
   final String postId;
 
@@ -25,7 +27,6 @@ class ViewPostPage extends StatelessWidget {
         },
         child: BlocBuilder<PostDetailBloc, PostDetailState>(
           builder: (context, state) {
-            // Your exact switch expression moved inside the feature layout layer
             final currentPost = switch (state) {
               PostDetailInitial() => null,
               PostDetailLoading(post: final p) => p,
@@ -72,7 +73,74 @@ class ViewPostPage extends StatelessWidget {
             // 4. Render Active Post Layout
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              child: PostCard(post: currentPost),
+              child: PostCard(
+                post: currentPost,
+                onLikeTapped: () {
+                  context.read<PostDetailBloc>().add(
+                    PostDetailLikeTapped(postId: currentPost.id),
+                  );
+                },
+                onProfileTapped: () {
+                  // 1. Get the current active path (e.g. '/explore/post/123'
+                  final currentLocation = GoRouterState.of(
+                    context,
+                  ).matchedLocation;
+                  // 2. Find where the sub-route starts to cut it off
+                  final postIndex = currentLocation.indexOf('/post/');
+                  // 3. Keep only the base parent tab (e.g. '/explore' or '/feed')
+                  final String baseTabPath = postIndex != -1
+                      ? currentLocation.substring(0, postIndex)
+                      : '';
+                  // 4. Push the profile view on top of the current tab
+                  context.push('$baseTabPath/user/${currentPost.author.id}');
+                },
+                onCommentTapped: () {
+                  // Trigger fetch before opening sheet
+                  final postDetailBloc = context.read<PostDetailBloc>();
+                  postDetailBloc.add(
+                    PostDetailCommentsFetchRequested(postId: currentPost.id),
+                  );
+
+                  // Open sheet from the screen level, passing the screen's context
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (modalContext) {
+                      return BlocProvider.value(
+                        value: postDetailBloc,
+                        child: BlocBuilder<PostDetailBloc, PostDetailState>(
+                          builder: (modalContext, state) {
+                            final List<Comment> fetchedComments =
+                                switch (state) {
+                                  PostDetailInitial() => const [],
+                                  PostDetailLoading() => state.comments,
+                                  PostDetailSuccess() => state.comments,
+                                  PostDetailFailure() => state.comments,
+                                };
+
+                            return CommentSheetContent(
+                              comments: fetchedComments,
+                              isLoading: state is PostDetailLoading,
+                              errorMessage: state is PostDetailFailure
+                                  ? state.errorMessage
+                                  : null,
+                              onCommentSubmitted: (typedText) {
+                                postDetailBloc.add(
+                                  PostDetailCommentSubmitted(
+                                    postId: postId,
+                                    text: typedText,
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             );
           },
         ),
