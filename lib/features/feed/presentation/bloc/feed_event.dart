@@ -12,3 +12,25 @@ class FeedFetchNextPage extends FeedEvent {}
 
 /// Fired by pull-to-refresh interactions to silently reload the feed entries.
 class FeedRefreshRequested extends FeedEvent {}
+
+/// Triggers state update for likes directly in the feed array list.
+class FeedPostLikeTapped extends FeedEvent {
+  final String postId;
+
+  const FeedPostLikeTapped({required this.postId});
+}
+
+/// Fired when a user successfully submits a new comment from the feed sheet.
+class FeedCommentSubmitted extends FeedEvent {
+  final String postId;
+  final String text;
+
+  const FeedCommentSubmitted({required this.postId, required this.text});
+}
+
+/// Fired when the user clicks the comments section button on the feed.
+class CommentsFetchRequested extends FeedEvent {
+  final String postId;
+
+  const CommentsFetchRequested({required this.postId});
+}

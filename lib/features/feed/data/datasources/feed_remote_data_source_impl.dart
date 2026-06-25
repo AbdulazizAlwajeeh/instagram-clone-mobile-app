@@ -24,6 +24,7 @@ class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
           .select('''
         *,
         profiles!inner (
+          id,
           username,
           avatar_url,
           follows!following_id!inner (

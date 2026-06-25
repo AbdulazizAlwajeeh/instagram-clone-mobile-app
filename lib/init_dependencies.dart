@@ -199,6 +199,9 @@ void _initFeed() {
       () => FeedBloc(
         getFollowedUsersPosts: serviceLocator(),
         currentUserCubit: serviceLocator(),
+        toggleLikePost: serviceLocator(),
+        getPostComments: serviceLocator(),
+        addComment: serviceLocator(),
       ),
     );
 }
