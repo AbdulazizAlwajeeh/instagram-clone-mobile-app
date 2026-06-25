@@ -142,8 +142,12 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: feedPath,
-                builder: (context, state) =>
-                    FeedPage(feedBloc: serviceLocator<FeedBloc>()),
+                builder: (context, state) {
+                  return BlocProvider<FeedBloc>(
+                    create: (context) => serviceLocator<FeedBloc>(),
+                    child: const FeedPage(),
+                  );
+                },
                 routes: [userProfileRoute, viewPostRoute],
               ),
             ],

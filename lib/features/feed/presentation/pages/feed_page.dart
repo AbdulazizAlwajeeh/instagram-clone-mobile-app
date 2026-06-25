@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/posts/presentation/widgets/comment_sheet_content.dart';
 import '../../../../core/posts/presentation/widgets/post_card.dart';
 import '../bloc/feed_bloc.dart';
 
 class FeedPage extends StatefulWidget {
-  final FeedBloc feedBloc;
-
-  const FeedPage({super.key, required this.feedBloc});
+  const FeedPage({super.key});
 
   @override
   State<FeedPage> createState() => _FeedPageState();
@@ -14,17 +14,19 @@ class FeedPage extends StatefulWidget {
 
 class _FeedPageState extends State<FeedPage> {
   final ScrollController _scrollController = ScrollController();
+  late final FeedBloc _feedBloc;
 
   @override
   void initState() {
     super.initState();
-    widget.feedBloc.add(FeedFetchInitialPosts());
+    _feedBloc = context.read<FeedBloc>();
+    _feedBloc.add(FeedFetchInitialPosts());
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
     if (_isBottom) {
-      widget.feedBloc.add(FeedFetchNextPage());
+      _feedBloc.add(FeedFetchNextPage());
     }
   }
 
@@ -43,64 +45,62 @@ class _FeedPageState extends State<FeedPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<FeedBloc>(
-      create: (_) => widget.feedBloc,
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Yemengram'), centerTitle: false),
-        body: RefreshIndicator(
-          onRefresh: () async {
-            widget.feedBloc.add(FeedRefreshRequested());
-            // Wait until the loading status drops to dismiss the spinner smoothly
-            await widget.feedBloc.stream.firstWhere(
-              (state) => state.status != FeedStatus.loading,
-            );
-          },
-          child: BlocBuilder<FeedBloc, FeedState>(
-            builder: (context, state) {
-              switch (state.status) {
-                case FeedStatus.initial:
-                case FeedStatus.loading:
-                  return const Center(child: CircularProgressIndicator());
+    return Scaffold(
+      appBar: AppBar(title: const Text('Yemengram'), centerTitle: false),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          _feedBloc.add(FeedRefreshRequested());
+          // Wait until the loading status drops to dismiss the spinner smoothly
+          await _feedBloc.stream.firstWhere(
+            (state) => state.status != FeedStatus.loading,
+          );
+        },
+        child: BlocBuilder<FeedBloc, FeedState>(
+          bloc: _feedBloc,
+          builder: (context, state) {
+            switch (state.status) {
+              case FeedStatus.initial:
+              case FeedStatus.loading:
+                return const Center(child: CircularProgressIndicator());
 
-                case FeedStatus.failure:
+              case FeedStatus.failure:
+                return CustomScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: Center(
+                        child: Text(
+                          state.errorMessage.isNotEmpty
+                              ? state.errorMessage
+                              : 'Failed to load feed.',
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+
+              case FeedStatus.success:
+                if (state.posts.isEmpty) {
                   return CustomScrollView(
                     physics: AlwaysScrollableScrollPhysics(),
-                    slivers: [
+                    slivers: const [
                       SliverFillRemaining(
                         hasScrollBody: false,
                         child: Center(
                           child: Text(
-                            state.errorMessage.isNotEmpty
-                                ? state.errorMessage
-                                : 'Failed to load feed.',
-                            style: const TextStyle(color: Colors.red),
+                            'Your feed is empty. Try following some creators!',
                           ),
                         ),
                       ),
                     ],
                   );
+                }
 
-                case FeedStatus.success:
-                  if (state.posts.isEmpty) {
-                    return CustomScrollView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      slivers: const [
-                        SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: Center(
-                            child: Text(
-                              'Your feed is empty. Try following some creators!',
-                            ),
-                          ),
-                        ),
-                      ],
-                    );
-                  }
-
-                  return _buildListView(state);
-              }
-            },
-          ),
+                return _buildListView(state);
+            }
+          },
         ),
       ),
     );
@@ -126,18 +126,50 @@ class _FeedPageState extends State<FeedPage> {
         final post = state.posts[index];
 
         return PostCard(
-          username: post.author.username,
-          userAvatarUrl: post.author.avatarUrl,
-          postImageUrl: post.mediaUrl,
-          caption: post.caption ?? '',
-          likesCount: 0,
-          isLiked: false,
-          timeAgo: '${post.createdAt.hour}:${post.createdAt.minute}',
-          onProfileTapped: () {},
-          onLikeTapped: () {},
-          onCommentTapped: () {},
-          onShareTapped: () {},
-          onSaveTapped: () {},
+          post: post,
+          onLikeTapped: () {
+            _feedBloc.add(FeedPostLikeTapped(postId: post.id));
+          },
+          onProfileTapped: () {
+            context.push('/user/${post.author.id}');
+          },
+          onCommentTapped: () {
+            _feedBloc.add(CommentsFetchRequested(postId: post.id));
+
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (modalContext) {
+                return BlocProvider.value(
+                  value: _feedBloc,
+                  child: BlocBuilder<FeedBloc, FeedState>(
+                    builder: (sheetContext, sheetState) {
+                      return CommentSheetContent(
+                        comments: sheetState.activeComments,
+                        isLoading:
+                            sheetState.isFetchingComments ||
+                            sheetState.isSubmittingComment,
+                        errorMessage:
+                            sheetState.errorMessage.isNotEmpty &&
+                                sheetState.activeComments.isEmpty
+                            ? sheetState.errorMessage
+                            : null,
+                        onCommentSubmitted: (typedText) {
+                          _feedBloc.add(
+                            FeedCommentSubmitted(
+                              postId: post.id,
+                              text: typedText,
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                );
+              },
+            );
+          },
         );
       },
     );
