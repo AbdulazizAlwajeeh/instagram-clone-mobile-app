@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import '../../../../core/posts/presentation/widgets/comment_sheet_content.dart';
 import '../../../../core/posts/presentation/widgets/post_card.dart';
 import '../bloc/feed_bloc.dart';
 
 class FeedPage extends StatefulWidget {
-  const FeedPage({super.key});
+  final Function(String userId)? onProfileTapped;
+
+  const FeedPage({super.key, this.onProfileTapped});
 
   @override
   State<FeedPage> createState() => _FeedPageState();
@@ -131,7 +132,7 @@ class _FeedPageState extends State<FeedPage> {
             _feedBloc.add(FeedPostLikeTapped(postId: post.id));
           },
           onProfileTapped: () {
-            context.push('/user/${post.author.id}');
+            widget.onProfileTapped?.call(post.author.id);
           },
           onCommentTapped: () {
             _feedBloc.add(CommentsFetchRequested(postId: post.id));

@@ -15,7 +15,7 @@ class ProfileActions extends StatelessWidget {
     required this.isFollowing,
     this.onEditPressed,
     this.onFollowPressed,
-    this.onMessagePressed,
+    required this.onMessagePressed,
   });
 
   @override

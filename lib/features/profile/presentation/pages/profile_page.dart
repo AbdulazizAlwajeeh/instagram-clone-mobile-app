@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/features/profile/domain/entities/user_profile.dart';
 import 'package:yemengram/features/profile/presentation/bloc/profile_bloc.dart';
 import '../../../../core/router/app_router.dart';
 import '../bloc/profile_event.dart';
@@ -10,7 +11,10 @@ import '../widgets/profile_post_grid.dart';
 import '../widgets/profile_tab_delegate.dart';
 
 class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+  final Function(UserProfile)? onMessagePressed;
+  final Function(String postId)? onPostTapped;
+
+  const ProfilePage({super.key, this.onMessagePressed, this.onPostTapped});
 
   @override
   Widget build(BuildContext context) {
@@ -87,6 +91,8 @@ class ProfilePage extends StatelessWidget {
                           ),
                         );
                       },
+                      onMessagePressed: () =>
+                          onMessagePressed?.call(state.profile),
                     ),
                   ),
 
@@ -97,7 +103,12 @@ class ProfilePage extends StatelessWidget {
                   ),
 
                   // 3. Aspect-Locked Post Grid Stub
-                  ProfilePostGrid(posts: state.posts),
+                  ProfilePostGrid(
+                    posts: state.posts,
+                    onPostTapped: (postId) {
+                      onPostTapped?.call(postId);
+                    },
+                  ),
                 ],
               ),
             );

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:yemengram/core/posts/domain/entities/post.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/router/app_router.dart';
 
 class ProfilePostGrid extends StatelessWidget {
   final List<Post> posts;
+  final Function(String postId) onPostTapped;
 
-  const ProfilePostGrid({super.key, required this.posts});
+  const ProfilePostGrid({
+    super.key,
+    required this.posts,
+    required this.onPostTapped,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +23,7 @@ class ProfilePostGrid extends StatelessWidget {
       delegate: SliverChildBuilderDelegate((context, index) {
         return GestureDetector(
           onTap: () {
-            context.go(
-              AppRouter.viewPostFullPath(
-                AppRouter.profilePath,
-                posts[index].id,
-              ),
-            );
+            onPostTapped(posts[index].id);
           },
           child: Image.network(
             posts[index].mediaUrl,

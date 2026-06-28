@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/core/app_user/domain/entities/app_user.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_state.dart';
 import 'package:yemengram/features/auth/presentation/pages/sign_in_page.dart';
@@ -20,6 +21,8 @@ import 'package:yemengram/features/create_post/presentation/pages'
 import 'package:yemengram/features/chat/presentation/pages/chat_page.dart';
 import 'package:yemengram/features/profile/presentation/pages/edit_profile_page.dart';
 import 'package:yemengram/features/profile/presentation/pages/profile_page.dart';
+import '../../features/chat/presentation/bloc/chat_bloc.dart';
+import '../../features/chat/presentation/pages/texting_page.dart';
 import '../../features/explore/presentation/bloc/explore_bloc.dart';
 import '../../features/profile/presentation/bloc/profile_bloc.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
@@ -45,6 +48,8 @@ class AppRouter {
   static const String profilePath = '/profile';
   static const String editProfilePath = 'edit';
   static const String editProfileFullPath = '/profile/edit';
+  static const String textingSubPath = 'texting/:chatId';
+  static const String textingName = 'texting';
 
   // Sub-route path constants
   static const String settingsPath =
@@ -65,7 +70,7 @@ class AppRouter {
     return '$currentTab/post/$postId';
   }
 
-  final userProfileRoute = GoRoute(
+  GoRoute get userProfileRoute => GoRoute(
     path: dynamicProfileSubPath,
     builder: (context, state) {
       final targetUserId = state.pathParameters['userId'];
@@ -73,7 +78,22 @@ class AppRouter {
         create: (context) =>
             serviceLocator<ProfileBloc>()
               ..add(ProfileFetchRequested(userId: targetUserId)),
-        child: const ProfilePage(),
+        child: ProfilePage(
+          onPostTapped: (postId) => context.push('/post/$postId'),
+          onMessagePressed: (loadedProfile) {
+            AppUser user = AppUser(
+              id: loadedProfile.id,
+              username: loadedProfile.username,
+              email: '',
+              avatarUrl: loadedProfile.avatarUrl,
+            );
+            context.pushNamed(
+              AppRouter.textingName,
+              pathParameters: {'chatId': 'new'},
+              extra: user,
+            );
+          },
+        ),
       );
     },
   );
@@ -88,6 +108,20 @@ class AppRouter {
             serviceLocator<PostDetailBloc>()
               ..add(PostDetailFetchRequested(postId: postId)),
         child: ViewPostPage(postId: postId),
+      );
+    },
+  );
+
+  GoRoute get textingRoute => GoRoute(
+    path: textingSubPath,
+    name: textingName,
+    builder: (context, state) {
+      final chatId = state.pathParameters['chatId']!;
+      final targetUser = state.extra as AppUser;
+
+      return BlocProvider<ChatBloc>(
+        create: (context) => serviceLocator<ChatBloc>(),
+        child: TextingPage(targetUser: targetUser, chatId: chatId),
       );
     },
   );
@@ -145,7 +179,10 @@ class AppRouter {
                 builder: (context, state) {
                   return BlocProvider<FeedBloc>(
                     create: (context) => serviceLocator<FeedBloc>(),
-                    child: const FeedPage(),
+                    child: FeedPage(
+                      onProfileTapped: (userId) =>
+                          context.push('/user/$userId'),
+                    ),
                   );
                 },
                 routes: [userProfileRoute, viewPostRoute],
@@ -183,8 +220,19 @@ class AppRouter {
             routes: [
               GoRoute(
                 path: chatPath,
-                builder: (context, state) => const ChatPage(),
-                routes: [userProfileRoute],
+                builder: (context, state) => BlocProvider<ChatBloc>(
+                  create: (context) => serviceLocator<ChatBloc>(),
+                  child: ChatPage(
+                    onChatSelected: (chatId, otherUser) {
+                      context.goNamed(
+                        AppRouter.textingName,
+                        pathParameters: {'chatId': chatId},
+                        extra: otherUser,
+                      );
+                    },
+                  ),
+                ),
+                routes: [userProfileRoute, textingRoute],
               ),
             ],
           ),
