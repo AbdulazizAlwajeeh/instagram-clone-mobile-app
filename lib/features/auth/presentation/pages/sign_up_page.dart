@@ -9,7 +9,12 @@ import '../bloc/auth_state.dart';
 import '../widgets/auth_action.dart';
 import '../widgets/auth_text_field.dart';
 
+/// A presentation page layer displaying the registration and account provisioning form layout.
+///
+/// Captures user input fields for metadata collection and passes those credential attributes
+/// down towards background account generation state manager streams.
 class SignUpPage extends StatefulWidget {
+  /// Instantiates a stateless configuration anchor frame for new profile registrations.
   const SignUpPage({super.key});
 
   @override
@@ -17,19 +22,28 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  /// Form tracking key used to evaluate structural field validations atomically.
   final _formKey = GlobalKey<FormState>();
+
+  /// Form input text capture manager holding onto unique username handles.
   final _usernameController = TextEditingController();
+
+  /// Form input text capture manager holding onto profile email strings.
   final _emailController = TextEditingController();
+
+  /// Form input text capture manager holding onto the chosen security password track.
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
-    _usernameController.dispose();
+    _usernameController
+        .dispose(); // Releases filesystem focus locks on widget disposal.
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
+  /// Triggers structural client-side validations and forwards profile registration parameters upstream.
   void _handleSignUp() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
@@ -48,9 +62,11 @@ class _SignUpPageState extends State<SignUpPage> {
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
+          // Outer safety gutter wrapping registration input forms.
           child: BlocConsumer<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state is AuthFailure) {
+                // Intercepts processing boundaries errors to alert user interaction channels.
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.message),
@@ -59,13 +75,16 @@ class _SignUpPageState extends State<SignUpPage> {
                 );
               }
               if (state is AuthSuccess) {
+                // Intercepts registration completion states to notify users of verification steps.
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(content: Text('Now confirm your email!')),
                 );
               }
             },
             builder: (context, state) {
-              final isLoading = state is AuthLoading;
+              final isLoading =
+                  state
+                      is AuthLoading; // Freezes user input channels during remote database transits.
 
               return Form(
                 key: _formKey,
@@ -113,7 +132,9 @@ class _SignUpPageState extends State<SignUpPage> {
                       isLoading: isLoading,
                       onPrimaryPressed: _handleSignUp,
                       onSecondaryPressed: () {
-                        context.go(AppRouter.signInPath);
+                        context.go(
+                          AppRouter.signInPath,
+                        ); // Redirects traffic streams directly back to login entry views.
                       },
                     ),
                   ],
