@@ -29,6 +29,16 @@ import 'core/theme/data/datasources/theme_local_data_source_impl.dart';
 import 'core/theme/data/repositories/theme_repository_impl.dart';
 import 'core/theme/domain/repositories/theme_repository.dart';
 import 'core/theme/presentation/bloc/theme_bloc.dart';
+import 'features/chat/data/datasources/chat_remote_data_source.dart';
+import 'features/chat/data/datasources/chat_remote_data_source_impl.dart';
+import 'features/chat/data/repositories/chat_repository_impl.dart';
+import 'features/chat/domain/repositories/chat_repository.dart';
+import 'features/chat/domain/usecases/get_or_create_chat.dart';
+import 'features/chat/domain/usecases/mark_message_as_read.dart';
+import 'features/chat/domain/usecases/send_message.dart';
+import 'features/chat/domain/usecases/watch_all_chats.dart';
+import 'features/chat/domain/usecases/watch_messages.dart';
+import 'features/chat/presentation/bloc/chat_bloc.dart';
 import 'features/create_post/data/datasources/create_post_remote_data_source.dart';
 import 'features/create_post/data/datasources/create_post_remote_data_source_impl.dart';
 import 'features/create_post/data/repositories/create_post_repository_impl.dart';
@@ -95,6 +105,8 @@ Future<void> initDependencies() async {
   _initPostDetail();
 
   _initExplore();
+
+  _initChat();
 
   // Register Global Core Router Singleton
   serviceLocator.registerSingleton<AppRouter>(
@@ -288,5 +300,47 @@ void _initExplore() {
   // Registered as a factory so each time a user opens explore, a fresh BLoC/state instance is built
   serviceLocator.registerFactory(
     () => ExploreBloc(getAllPosts: serviceLocator<GetAllPosts>()),
+  );
+}
+
+void _initChat() {
+  // 1. Remote Data Source Factory
+  serviceLocator.registerFactory<ChatRemoteDataSource>(
+    () => ChatRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+  );
+
+  // 2. Repository Implementation Factory
+  serviceLocator.registerFactory<ChatRepository>(
+    () => ChatRepositoryImpl(serviceLocator<ChatRemoteDataSource>()),
+  );
+
+  // 3. Domain Use Case Factories
+  serviceLocator.registerFactory(
+    () => WatchAllChats(serviceLocator<ChatRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => GetOrCreateChat(serviceLocator<ChatRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => WatchMessages(serviceLocator<ChatRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => SendMessage(serviceLocator<ChatRepository>()),
+  );
+  serviceLocator.registerFactory(
+    () => MarkMessagesAsRead(serviceLocator<ChatRepository>()),
+  );
+
+  // 4. Presentation BLoC Factory
+  // Registered as a factory so that entering the chat feature allocates a fresh,
+  // clean state machine with pristine real-time stream subscription variables.
+  serviceLocator.registerFactory(
+    () => ChatBloc(
+      watchAllChats: serviceLocator<WatchAllChats>(),
+      watchMessages: serviceLocator<WatchMessages>(),
+      sendMessage: serviceLocator<SendMessage>(),
+      markMessagesAsRead: serviceLocator<MarkMessagesAsRead>(),
+      getOrCreateChat: serviceLocator<GetOrCreateChat>(),
+    ),
   );
 }

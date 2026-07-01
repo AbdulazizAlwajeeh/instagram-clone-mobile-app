@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 /// at the top of every build method. Provides direct semantic shortcuts.
 
 extension ThemeContextExtension on BuildContext {
-  // Directly exposes the ThemeData object
+  /// Directly exposes the active [ThemeData] structural configuration framework for this context node.
   ThemeData get theme => Theme.of(this);
 
-  // Directly exposes the textTheme matrix
+  /// Directly exposes the [TextTheme] typographic system matrix populated by the ambient theme token provider.
   TextTheme get textTheme => Theme.of(this).textTheme;
 
-  // Directly exposes the colorScheme palette
+  /// Directly exposes the active [ColorScheme] color token mappings assigned to the matching presentation tree.
   ColorScheme get colorScheme => Theme.of(this).colorScheme;
 }

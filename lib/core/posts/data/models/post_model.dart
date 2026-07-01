@@ -2,7 +2,12 @@ import 'package:yemengram/features/auth/data/models/app_user_model.dart';
 
 import '../../domain/entities/post.dart';
 
+/// Data model representing a social media post within the data layer.
+///
+/// Extends the core [Post] domain entity to provide serialization capabilities
+/// (JSON parsing and formatting) required for Supabase communications.
 class PostModel extends Post {
+  /// Creates a immutable instance of [PostModel].
   const PostModel({
     required super.id,
     required super.author,
@@ -14,8 +19,10 @@ class PostModel extends Post {
     required super.isLiked,
   });
 
-  /// Factory constructor to create a PostModel from a Supabase JSON map
+  /// Factory constructor to convert a Supabase multi-table join JSON payload
+  /// into a structural [PostModel] instance.
   factory PostModel.fromJson(Map<String, dynamic> json) {
+    // Extract nested profile data from the relational query join.
     final userData = json['profiles'] as Map<String, dynamic>? ?? const {};
 
     // Safe evaluation of the nested likes join count array
@@ -28,7 +35,7 @@ class PostModel extends Post {
     return PostModel(
       id: json['id'] as String,
       author: AppUserModel.fromJson(userData),
-      // Can be null
+      // Can be null if the user posts without a text body.
       caption: json['caption'] as String?,
       mediaUrl: json['media_url'] as String,
       likesCount: json['likes_count'] as int,
@@ -39,12 +46,14 @@ class PostModel extends Post {
     );
   }
 
-  /// Efficient constructor for flat post queries without table joins
+  /// Specialized factory constructor for mapping flat database rows
+  /// that skip complex relational table joins for performance tuning.
   factory PostModel.fromFlatJson(Map<String, dynamic> json) {
     final String postAuthorId = json['user_id'] as String;
 
     return PostModel(
       id: json['id'] as String,
+      // Generates a skeletal user entity when author profiles aren't requested.
       author: AppUserModel(id: postAuthorId, username: '', email: ''),
       caption: json['caption'] as String?,
       mediaUrl: json['media_url'] as String,
@@ -55,7 +64,8 @@ class PostModel extends Post {
     );
   }
 
-  /// Method to convert a PostModel back into a Supabase JSON map (useful for inserting data)
+  /// Serialization method to format the [PostModel] fields back into
+  /// a raw relational payload suitable for Supabase insertion or updates.
   Map<String, dynamic> toJson() {
     return {
       'id': id,

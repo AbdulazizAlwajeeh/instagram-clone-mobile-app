@@ -5,9 +5,15 @@ import '../models/comment_model.dart';
 import '../models/post_model.dart';
 import 'post_detail_remote_data_source.dart';
 
+/// Concrete implementation of [PostDetailRemoteDataSource] using [SupabaseClient].
+///
+/// Handles low-level database operations, table joins, transactions, and conversion
+/// of raw relational data JSON into clean Dart domain models.
 class PostDetailRemoteDataSourceImpl implements PostDetailRemoteDataSource {
+  /// Direct client reference to communicate with your Supabase backend application instance.
   final SupabaseClient _supabaseClient;
 
+  /// Creates a [PostDetailRemoteDataSourceImpl] instance with the required client injection.
   const PostDetailRemoteDataSourceImpl(this._supabaseClient);
 
   @override
@@ -99,6 +105,7 @@ class PostDetailRemoteDataSourceImpl implements PostDetailRemoteDataSource {
       return data.map((commentJson) {
         final profile = commentJson['profiles'] as Map<String, dynamic>?;
 
+        // Normalize raw nested table joins into a single flat model structure.
         return CommentModel.fromJson({
           'id': commentJson['id'],
           'post_id': commentJson['post_id'],

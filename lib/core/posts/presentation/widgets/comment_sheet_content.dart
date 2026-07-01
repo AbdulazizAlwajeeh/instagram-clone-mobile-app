@@ -3,12 +3,24 @@ import '../../../theme/app_dimensions.dart';
 import '../../../theme/theme_extensions.dart';
 import '../../domain/entities/comment.dart';
 
+/// Presentation layer modal widget rendering the comment thread for a specific post.
+///
+/// Designed to load inside a draggable bottom sheet, managing its own text input field
+/// layout, keyboard view insets, loading animations, and submission callbacks.
 class CommentSheetContent extends StatefulWidget {
+  /// The collection of active user comments retrieved for display.
   final List<Comment> comments;
+
+  /// Flag indicating whether the comment stream is currently fetching from the data layer.
   final bool isLoading;
+
+  /// Optional error string containing network message notifications on operation rejections.
   final String? errorMessage;
+
+  /// Notification callback triggered when the user submits a valid text comment block.
   final Function(String) onCommentSubmitted;
 
+  /// Creates a [CommentSheetContent] sheet modal instance.
   const CommentSheetContent({
     super.key,
     required this.comments,
@@ -52,12 +64,14 @@ class _CommentSheetContentState extends State<CommentSheetContent> {
             ),
           ),
           child: Padding(
+            // Adjusts the sheet padding dynamically to float on top of the keyboard.
             padding: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
             ),
             child: Column(
               children: [
                 const SizedBox(height: AppDimensions.xs),
+                // Visual drag handle element
                 Container(
                   width: 40,
                   height: 4,
@@ -76,6 +90,7 @@ class _CommentSheetContentState extends State<CommentSheetContent> {
                   ),
                 ),
                 const Divider(),
+                // Content Feed Layer Strategy Selection
                 Expanded(
                   child: widget.isLoading
                       ? const Center(child: CircularProgressIndicator())
@@ -116,6 +131,7 @@ class _CommentSheetContentState extends State<CommentSheetContent> {
                         ),
                 ),
                 const Divider(height: 1),
+                // Persistent Input Box Action Bar
                 SafeArea(
                   child: Padding(
                     padding: const EdgeInsets.all(AppDimensions.sm),

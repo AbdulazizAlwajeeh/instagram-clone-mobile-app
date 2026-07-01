@@ -8,12 +8,19 @@ import '../../domain/usecases/get_post_by_id.dart';
 import '../../domain/usecases/get_post_comments.dart';
 import '../../domain/usecases/toggle_lilke_post.dart';
 
+/// Presentation-layer Bloc coordinating detail view lifecycles for individual posts.
+///
+/// Orchestrates the execution of decoupled business use cases targeting isolated
+/// post evaluations, interactive likes, and relational comment tracking streams.
+/// Leverages state data caching mechanisms to maintain uninterrupted visual flow
+/// across loading, failure, or lazy-evaluation timelines.
 class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
   final GetPostById _getPostById;
   final ToggleLikePost _toggleLikePost;
   final GetPostComments _getPostComments;
   final AddComment _addComment;
 
+  /// Creates a [PostDetailBloc] instance with all domain interactions explicitly injected.
   PostDetailBloc({
     required GetPostById getPostById,
     required ToggleLikePost toggleLikePost,
@@ -26,6 +33,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
        super(const PostDetailInitial()) {
     on<PostDetailEvent>((event, emit) async {
       // 1. Safely extract existing data from whichever state is active
+      // Uses Dart pattern matching switches to preserve existing data across visually jarring jumps.
       final dynamic existingPost = switch (state) {
         PostDetailInitial() => null,
         PostDetailLoading(post: final p) => p,
@@ -88,7 +96,6 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     });
   }
 
-  /// Manages pulling single entity records securely through the domain layer pipeline.
   Future<void> _handleFetchOrRefresh(
     String postId,
     dynamic existingPost,
@@ -108,8 +115,6 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
       (post) => emit(PostDetailSuccess(post, comments: existingComments)),
     );
   }
-
-  /// Processes the asynchronous Supabase database like/unlike interaction routines.
 
   Future<void> _handleToggleLike(
     String postId,
@@ -173,7 +178,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
         ),
       ),
       (_) {
-        // Manually increment the counter right here in memory
+        // Optimistically increment the numerical metadata layer on runtime memory structures.
         dynamic updatedPost = existingPost;
         if (existingPost != null) {
           try {

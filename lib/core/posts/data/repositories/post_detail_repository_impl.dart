@@ -6,9 +6,16 @@ import '../../domain/entities/comment.dart';
 import '../../domain/repositories/post_detail_repository.dart';
 import '../datasoucres/post_detail_remote_data_source.dart';
 
+/// Concrete implementation of [PostDetailRepository] in the data layer.
+///
+/// This repository orchestrates data access by calling [PostDetailRemoteDataSource]
+/// and catches low-level exceptions, transforming them into functional error [Failure]
+/// objects using the `fpdart` [Either] type for safer error handling in the UI.
 class PostDetailRepositoryImpl implements PostDetailRepository {
+  /// Remote data provider interacting with the database network client.
   final PostDetailRemoteDataSource _remoteDataSource;
 
+  /// Creates a [PostDetailRepositoryImpl] with the required data source injection.
   const PostDetailRepositoryImpl(this._remoteDataSource);
 
   @override

@@ -8,9 +8,15 @@ import '../bloc/post_details_event.dart';
 import '../bloc/post_details_state.dart';
 import '../widgets/comment_sheet_content.dart';
 
+/// Presentation layer screen widget that renders a detailed view of a single post.
+///
+/// Coordinates pulling fresh data via [RefreshIndicator], pattern-matches the active
+/// bloc state to handle screen states, and opens the comments workflow sheet.
 class ViewPostPage extends StatelessWidget {
+  /// The distinct identification key of the target post to display.
   final String postId;
 
+  /// Creates a [ViewPostPage] screen widget instance.
   const ViewPostPage({super.key, required this.postId});
 
   @override
@@ -27,6 +33,7 @@ class ViewPostPage extends StatelessWidget {
         },
         child: BlocBuilder<PostDetailBloc, PostDetailState>(
           builder: (context, state) {
+            // Extract the active post instance across states using pattern matching.
             final currentPost = switch (state) {
               PostDetailInitial() => null,
               PostDetailLoading(post: final p) => p,
