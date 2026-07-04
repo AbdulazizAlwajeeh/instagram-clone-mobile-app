@@ -3,9 +3,14 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/error/exceptions.dart';
 import 'create_post_remote_data_source.dart';
 
+/// Implementation of [CreatePostRemoteDataSource] utilizing Supabase services.
+///
+/// This class handles uploading binary media to Supabase Storage and storing
+/// the relational post records inside the Supabase Database.
 class CreatePostRemoteDataSourceImpl implements CreatePostRemoteDataSource {
   final SupabaseClient _supabaseClient;
 
+  /// Creates a new instance of [CreatePostRemoteDataSourceImpl] with a [SupabaseClient].
   const CreatePostRemoteDataSourceImpl(this._supabaseClient);
 
   @override

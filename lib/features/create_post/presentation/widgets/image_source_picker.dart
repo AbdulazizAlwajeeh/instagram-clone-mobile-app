@@ -1,8 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+/// Presentation utility helper exposing a modal interface sheet for selecting image capture channels.
+///
+/// Prompts the user with structured choices allowing target selections from
+/// either the platform native multimedia photo gallery or the system hardware camera module.
 class ImageSourcePicker {
-  static void show(BuildContext context, Function(ImageSource) onSourceSelected) {
+  /// Spawns a platform safe bottom modal action dialog window holding media routes.
+  ///
+  /// ### Parameters:
+  /// * [context] : The build anchor interface containing contextual element coordinates.
+  /// * [onSourceSelected] : The return capture event callback pipeline executing after selections.
+  static void show(
+    BuildContext context,
+    Function(ImageSource) onSourceSelected,
+  ) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {

@@ -2,6 +2,10 @@ import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 
+/// Contract definition for the post creation domain repository interface layer.
+///
+/// Outlines the structural requirements for handling media assets and relational
+/// database persistence operations without exposing domain-specific implementations.
 abstract class CreatePostRepository {
   /// Publishes a new user post to the system.
   ///

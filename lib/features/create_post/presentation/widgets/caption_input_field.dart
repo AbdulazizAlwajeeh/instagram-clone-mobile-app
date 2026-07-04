@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
 
+/// A presentation input component providing text editing utilities for post captions.
+///
+/// Combines a contextual author user avatar container inline alongside an auto-expanding
+/// multiline text manipulation field block.
 class CaptionInputField extends StatelessWidget {
+  /// The reactive logic manager reading and staging raw textual inputs.
   final TextEditingController controller;
+
+  /// The optional network location pointer referencing the user's thumbnail icon.
   final String? userAvatarUrl;
 
+  /// Compiles immutable constraints around structural inputs and controller triggers.
   const CaptionInputField({
     super.key,
     required this.controller,
@@ -14,6 +22,7 @@ class CaptionInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Evaluate validity configurations directly to resolve image decoration properties
     final hasAvatar = userAvatarUrl != null && userAvatarUrl!.isNotEmpty;
 
     return Padding(

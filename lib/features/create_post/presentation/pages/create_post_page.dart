@@ -10,7 +10,12 @@ import '../../../../core/theme/theme_extensions.dart';
 import '../bloc/create_post_bloc.dart';
 import '../widgets/media_picker.dart';
 
+/// Presentation view layer enabling users to compose captions and pick media attachments.
+///
+/// Orchestrates form lifecycles, native asset selection via device camera/gallery,
+/// and maps UI interaction hooks directly to the underlying state machine.
 class CreatePostPage extends StatefulWidget {
+  /// Instantiates a new post creation form view window.
   const CreatePostPage({super.key});
 
   @override
@@ -22,6 +27,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
   final ImagePicker _picker = ImagePicker();
   File? _selectedImage;
 
+  /// Dispatches a platform request to load binary pictures from a native [ImageSource].
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -40,6 +46,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     }
   }
 
+  /// Triggers submission validation constraints before requesting an export event.
   void _onPublishPressed(CreatePostState state) {
     if (state is CreatePostLoading) return;
 
@@ -60,6 +67,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
     );
   }
 
+  /// Resets internal parameters and routes the user back to the primary feed section.
   void _resetAndPop() {
     setState(() {
       _captionController.clear();
