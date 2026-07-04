@@ -6,9 +6,14 @@ import '../../domain/entities/message.dart';
 import '../../domain/repositories/chat_repository.dart';
 import '../datasources/chat_remote_data_source.dart';
 
+/// Concrete implementation handling orchestration of data operations for the Chat feature.
+///
+/// Maps exceptions originating from remote infrastructure elements down to structured
+/// business-layer [Failure] wrappers handled by domain use cases.
 class ChatRepositoryImpl implements ChatRepository {
   final ChatRemoteDataSource _remoteDataSource;
 
+  /// Creates a single instance of [ChatRepositoryImpl].
   const ChatRepositoryImpl(this._remoteDataSource);
 
   @override

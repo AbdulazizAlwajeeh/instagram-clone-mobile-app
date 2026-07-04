@@ -1,11 +1,21 @@
 import '../../../../core/app_user/domain/entities/app_user.dart';
 import '../../domain/entities/chat.dart';
 
+/// Data representation model for a chat conversation row.
+///
+/// Extends the core [Chat] entity to map database fields from the data layer,
+/// providing factory methods for serialization and conversion.
 class ChatModel extends Chat {
+  /// The unique identification key of the first participant.
   final String userOneId;
+
+  /// The unique identification key of the second participant.
   final String userTwoId;
+
+  /// The unique identification key of the user who dispatched the latest message.
   final String? lastSenderId;
 
+  /// Creates a concrete instance of [ChatModel].
   const ChatModel({
     required super.id,
     required this.userOneId,
@@ -18,7 +28,10 @@ class ChatModel extends Chat {
     super.unreadCount = 0,
   });
 
-  /// Factory constructor to convert raw Supabase rows and profile data into ChatModel.
+  /// Factory constructor to convert raw Supabase rows and profile data into [ChatModel].
+  ///
+  /// Combines the conversation map row data with explicit [currentUserId],
+  /// [otherUserEntity], and [unreadCount] contexts computed during the data fetch.
   factory ChatModel.fromJson(
     Map<String, dynamic> json, {
     required String currentUserId,
@@ -43,6 +56,9 @@ class ChatModel extends Chat {
   }
 
   /// Converts the chat model variables back into a Supabase-compatible JSON map.
+  ///
+  /// Excludes relational runtime data like unread counts or sub-entities
+  /// to keep the map restricted to properties matching the core chats table fields.
   Map<String, dynamic> toJson() {
     return {
       'id': id,

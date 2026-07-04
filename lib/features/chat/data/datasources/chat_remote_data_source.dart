@@ -1,6 +1,10 @@
 import '../models/chat_model.dart';
 import '../models/message_model.dart';
 
+/// Data source interface responsible for direct remote communication.
+///
+/// Handles network, database, or WebSocket connections for the Chat feature.
+/// All implementations must throw a [ServerException] when remote mutations fail.
 abstract class ChatRemoteDataSource {
   /// Retrieves a real-time reactive data stream of active conversation models.
   ///
@@ -12,6 +16,7 @@ abstract class ChatRemoteDataSource {
   ///
   /// Evaluates existing alphanumeric channel pairs. If no prior conversation
   /// matching the specific profiles exists, it writes a new entry initialization payload.
+  ///
   /// Throws a [ServerException] if network transactions fail or data formatting breaks.
   Future<ChatModel> getOrCreateChat(String targetUserId);
 
@@ -24,6 +29,7 @@ abstract class ChatRemoteDataSource {
   /// Commits a new textual message transaction payload to the database storage.
   ///
   /// Inserts a fresh message data model row matching the target payload attributes.
+  ///
   /// Throws a [ServerException] if submission validation checks fail or connectivity drops.
   Future<void> sendMessage({
     required String chatId,
@@ -35,6 +41,7 @@ abstract class ChatRemoteDataSource {
   ///
   /// Target matches rows under the given [chatId] where the active authenticated session
   /// acts exclusively as the recipient entity, setting unread counter columns back to neutral.
+  ///
   /// Throws a [ServerException] if the write mutation operation fails.
   Future<void> markMessagesAsRead(String chatId);
 }

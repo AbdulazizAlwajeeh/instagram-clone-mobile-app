@@ -11,6 +11,10 @@ import '../../domain/usecases/mark_message_as_read.dart';
 import 'chat_event.dart';
 import 'chat_state.dart';
 
+/// Presentation layer state machine coordinator managing Chat domain events and reactive data streams.
+///
+/// Subscribes to real-time database streams and dispatches atomic user actions, translating
+/// business use-case outcomes into immutable UI presentation layer state vectors.
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final WatchAllChats _watchAllChats;
   final WatchMessages _watchMessages;
@@ -18,10 +22,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final MarkMessagesAsRead _markMessagesAsRead;
   final GetOrCreateChat _getOrCreateChat;
 
-  // Stream pipeline controller containers
+  // Stream pipeline controller containers to intercept connection leak drops
   StreamSubscription<List<Chat>>? _chatListSubscription;
   StreamSubscription<List<Message>>? _messageCanvasSubscription;
 
+  /// Creates a concrete, fully bounded instance of [ChatBloc].
   ChatBloc({
     required WatchAllChats watchAllChats,
     required WatchMessages watchMessages,
@@ -171,7 +176,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   @override
   Future<void> close() async {
-    // Master clean breakdown routines to intercept framework connection leak drops
+    // Master clean breakdown routines to prevent framework connection leak drops
     await _chatListSubscription?.cancel();
     await _messageCanvasSubscription?.cancel();
     return super.close();

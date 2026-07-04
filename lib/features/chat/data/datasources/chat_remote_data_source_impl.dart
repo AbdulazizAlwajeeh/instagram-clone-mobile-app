@@ -5,6 +5,9 @@ import '../models/chat_model.dart';
 import '../models/message_model.dart';
 import 'chat_remote_data_source.dart';
 
+/// Concrete implementation of [ChatRemoteDataSource] using Supabase.
+///
+/// Communicates directly with Supabase Realtime streams and database tables.
 class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   final SupabaseClient _supabaseClient;
 

@@ -8,10 +8,18 @@ import '../bloc/chat_bloc.dart';
 import '../bloc/chat_event.dart';
 import '../bloc/chat_state.dart';
 
+/// Presentation layer screen rendering the conversational chat feed thread interface.
+///
+/// Implements real-time message stream initialization and conditional room initialization
+/// pipelines using a combined [BlocConsumer] matrix to reactively sync layouts to state updates.
 class TextingPage extends StatefulWidget {
+  /// The unique identification key reference token matching the target conversation row.
   final String chatId;
+
+  /// The shared profile container instance defining the secondary chat partner participant.
   final AppUser targetUser;
 
+  /// Creates a single structural layout container instance of [TextingPage].
   const TextingPage({
     super.key,
     required this.chatId,

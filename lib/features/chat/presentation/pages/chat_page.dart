@@ -6,9 +6,15 @@ import '../bloc/chat_event.dart';
 import '../bloc/chat_state.dart';
 import '../widgets/chat_tile.dart';
 
+/// Presentation layer screen rendering the authenticated user's active conversations list.
+///
+/// Subscribes automatically to the [ChatBloc] dependency graph to render responsive,
+/// lazy-loaded [ChatTile] rows layout configurations matching real-time database mutations.
 class ChatPage extends StatefulWidget {
+  /// Navigation execution callback fired whenever a user selects a specific conversation tile.
   final void Function(String chatId, AppUser otherUser) onChatSelected;
 
+  /// Creates a single structural configuration instance of [ChatPage].
   const ChatPage({super.key, required this.onChatSelected});
 
   @override
