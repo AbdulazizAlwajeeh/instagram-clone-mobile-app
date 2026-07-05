@@ -4,9 +4,14 @@ import '../../../../core/posts/presentation/widgets/comment_sheet_content.dart';
 import '../../../../core/posts/presentation/widgets/post_card.dart';
 import '../bloc/feed_bloc.dart';
 
+/// Presentation screen housing the paginated timeline feed of followed creators.
+///
+/// Dispatches network tracking triggers via [FeedBloc] and sets up scroll listeners for endless pagination.
 class FeedPage extends StatefulWidget {
+  /// Callback triggered when an author avatar or username is tapped.
   final Function(String userId)? onProfileTapped;
 
+  /// Creates a [FeedPage] template layout wrapper.
   const FeedPage({super.key, this.onProfileTapped});
 
   @override
@@ -20,12 +25,14 @@ class _FeedPageState extends State<FeedPage> {
   @override
   void initState() {
     super.initState();
+    // Read the locally available state block from context and bootstrap initial results.
     _feedBloc = context.read<FeedBloc>();
     _feedBloc.add(FeedFetchInitialPosts());
     _scrollController.addListener(_onScroll);
   }
 
   void _onScroll() {
+    // Fire pagination event when scrolling passes the 90% boundary mark.
     if (_isBottom) {
       _feedBloc.add(FeedFetchNextPage());
     }

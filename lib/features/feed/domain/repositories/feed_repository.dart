@@ -2,6 +2,9 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/posts/domain/entities/post.dart';
 
+/// Abstract contract for the feed feature repository layer.
+///
+/// Defines domain-driven boundaries for gathering social news feeds.
 abstract class FeedRepository {
   /// Fetches a paginated timeline of posts from creators that the target user follows.
   ///

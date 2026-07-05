@@ -3,9 +3,11 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/posts/data/models/post_model.dart';
 import 'feed_remote_data_source.dart';
 
+/// Concrete implementation of [FeedRemoteDataSource] leveraging Supabase.
 class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
   final SupabaseClient supabaseClient;
 
+  /// Creates a [FeedRemoteDataSourceImpl] instance initialized with [supabaseClient].
   FeedRemoteDataSourceImpl(this.supabaseClient);
 
   @override
@@ -48,10 +50,13 @@ class FeedRemoteDataSourceImpl implements FeedRemoteDataSource {
           .order('created_at', ascending: false)
           .limit(limit);
 
+      // Parse JSON raw array elements into standard domain models.
       return response.map((postJson) => PostModel.fromJson(postJson)).toList();
     } on PostgrestException catch (e) {
+      // Map remote Postgrest execution failures to standard ServerExceptions.
       throw ServerException(e.message);
     } catch (e) {
+      // Handle remaining system type-casting or runtime boundary exceptions.
       throw ServerException(e.toString());
     }
   }

@@ -5,9 +5,13 @@ import '../../../../core/posts/domain/entities/post.dart';
 import '../../domain/repositories/feed_repository.dart';
 import '../datasources/feed_remote_data_source.dart';
 
+/// Concrete implementation of [FeedRepository] coordinating feed calculations.
+///
+/// Interacts directly with the infrastructure data layer to request post history.
 class FeedRepositoryImpl implements FeedRepository {
   final FeedRemoteDataSource remoteDataSource;
 
+  /// Creates a [FeedRepositoryImpl] initialized with a [remoteDataSource].
   FeedRepositoryImpl(this.remoteDataSource);
 
   @override

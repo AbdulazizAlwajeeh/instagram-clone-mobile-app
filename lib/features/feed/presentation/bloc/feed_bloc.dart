@@ -11,6 +11,7 @@ part 'feed_event.dart';
 
 part 'feed_state.dart';
 
+/// Business logic component orchestrating social feeds, cursor pagination, likes, and comment features.
 class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final GetFollowedUsersPosts _getFollowedUsersPosts;
   final CurrentUserCubit _currentUserCubit;
@@ -19,6 +20,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
   final GetPostComments _getPostComments;
   final AddComment _addComment;
 
+  /// Creates a [FeedBloc] initialized with required domain orchestrator use cases.
   FeedBloc({
     required GetFollowedUsersPosts getFollowedUsersPosts,
     required CurrentUserCubit currentUserCubit,
@@ -39,6 +41,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
     on<CommentsFetchRequested>(_onCommentsFetchRequested);
   }
 
+  /// Internal operational helper handling the main execution flow for primary data retrieval cycles.
   Future<void> _loadInitialPosts({required Emitter<FeedState> emit}) async {
     final currentUserId = _currentUserCubit.state is CurrentUserLoggedIn
         ? (_currentUserCubit.state as CurrentUserLoggedIn).user.id
