@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/posts/domain/entities/post.dart';
 
+/// Repository interface contract handling data fetching boundaries for exploration features.
 abstract class ExploreRepository {
   /// Retrieves a paginated or curated list of all available posts for exploration.
   ///

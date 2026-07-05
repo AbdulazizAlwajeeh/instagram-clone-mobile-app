@@ -6,13 +6,19 @@ import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
 import '../bloc/explore_bloc.dart';
 
+/// Presentation layer view that displays a search grid of explore posts.
+///
+/// Reacts dynamically to emitted states from [ExploreBloc] and triggers swipe-to-refresh events.
 class ExplorePage extends StatelessWidget {
+  /// Creates an instance of [ExplorePage].
   const ExplorePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Read the bloc from the context to add fetch/refresh requests.
     final bloc = context.read<ExploreBloc>();
 
+    // Calculate background surfaces conditionally depending on active brightness modes.
     final blockSurfaceColor = context.colorScheme.brightness == Brightness.dark
         ? const Color(0xFF1E293B) // Slate 800
         : const Color(0xFFE2E8F0); // Slate 200
@@ -54,6 +60,7 @@ class ExplorePage extends StatelessWidget {
                     ExploreFailure(posts: final p) => p,
                   };
 
+                  // Determine active loading state layout conditions based on initial state profiles.
                   final bool isLoading =
                       state is ExploreInitial ||
                       (state is ExploreLoading && currentPosts == null);
