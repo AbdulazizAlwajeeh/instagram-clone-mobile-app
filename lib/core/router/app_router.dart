@@ -351,7 +351,9 @@ class AppRouter {
                       serviceLocator<ProfileBloc>()
                         ..add(const ProfileFetchRequested(userId: null)),
                   // Passing null tells the system to query the authenticated user profile.
-                  child: const ProfilePage(),
+                  child: ProfilePage(
+                    onPostTapped: (postId) => context.push('/post/$postId'),
+                  ),
                 ),
                 routes: [
                   viewPostRoute,
