@@ -11,9 +11,14 @@ import '../bloc/edit_profile_event.dart';
 import '../bloc/edit_profile_state.dart';
 import '../widgets/profile_text_field.dart';
 
+/// Form page enabling interactive modification of an authenticated profile structure.
+///
+/// Coordinates text controllers, file picker callbacks, validation rules, and business streams.
 class EditProfilePage extends StatefulWidget {
+  /// The static historical user profile data snapshot used to prefill input forms.
   final UserProfile user;
 
+  /// Constructs a stateful [EditProfilePage] wrapping user initialization contexts.
   const EditProfilePage({super.key, required this.user});
 
   @override
@@ -21,6 +26,7 @@ class EditProfilePage extends StatefulWidget {
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
+  // Global form key state container managing inline validation routines
   final _formKey = GlobalKey<FormState>();
 
   // initial profile data
@@ -47,6 +53,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     super.dispose();
   }
 
+  /// Conditionally displays availability verification icons inside the trailing input decoration frame.
   Widget? _buildUsernameSuffixIcon(EditProfileState state) {
     if (state is EditProfileUsernameChecking) {
       return const Padding(
@@ -67,6 +74,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     return null;
   }
 
+  /// Evaluates current state conditions and fields validation status before broadcasting updates.
   void _saveProfile() {
     if (context.read<EditProfileBloc>().state is EditProfileUsernameTaken) {
       return;

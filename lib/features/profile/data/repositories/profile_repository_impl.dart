@@ -6,9 +6,13 @@ import '../../domain/entities/user_profile.dart';
 import '../../domain/repositories/profile_repository.dart';
 import '../datasources/profile_remote_data_source.dart';
 
+/// Concrete repository implementation that coordinates interactions with [ProfileRemoteDataSource].
+///
+/// Maps internal low-level exceptions into readable functional error [Failure] signatures.
 class ProfileRepositoryImpl implements ProfileRepository {
   final ProfileRemoteDataSource _remoteDataSource;
 
+  /// Creates a [ProfileRepositoryImpl] instance with the required [_remoteDataSource].
   const ProfileRepositoryImpl(this._remoteDataSource);
 
   @override

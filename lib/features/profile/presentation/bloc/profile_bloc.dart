@@ -11,6 +11,7 @@ import '../../domain/usecases/fetch_user_profile.dart';
 import 'profile_event.dart';
 import 'profile_state.dart';
 
+/// Business logic component managing profile views, updates, and social relationships.
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final FetchUserProfile _fetchUserProfile;
   final FetchUserPosts _fetchUserPosts;
@@ -18,6 +19,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final FollowUser _followUser;
   final UnfollowUser _unfollowUser;
 
+  /// Creates a [ProfileBloc] instance initializing event response handlers.
   ProfileBloc({
     required FetchUserProfile fetchUserProfile,
     required FetchUserPosts fetchUserPosts,

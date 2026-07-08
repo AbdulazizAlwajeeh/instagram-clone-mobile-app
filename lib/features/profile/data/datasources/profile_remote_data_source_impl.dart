@@ -4,9 +4,11 @@ import '../../../../core/posts/data/models/post_model.dart';
 import '../models/user_profile_model.dart';
 import 'profile_remote_data_source.dart';
 
+/// Production implementation of [ProfileRemoteDataSource] powered by the Supabase backend client.
 class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
   final SupabaseClient _supabaseClient;
 
+  /// Creates a [ProfileRemoteDataSourceImpl] with the required [SupabaseClient] dependency.
   const ProfileRemoteDataSourceImpl(this._supabaseClient);
 
   @override

@@ -4,9 +4,14 @@ import '../../../../core/usecase/usecase.dart';
 import '../entities/user_profile.dart';
 import '../repositories/profile_repository.dart';
 
+/// Use case responsible for retrieving a specific user's public profile data.
+///
+/// Implements the base [UseCase] contract mapping input string user identification keys
+/// to a matching [UserProfile] domain entity wrapped in an [Either] container.
 class FetchUserProfile implements UseCase<UserProfile, String> {
   final ProfileRepository _profileRepository;
 
+  /// Creates a [FetchUserProfile] use case with the given repository dependency.
   const FetchUserProfile(this._profileRepository);
 
   @override

@@ -10,10 +10,18 @@ import '../widgets/profile_header_section.dart';
 import '../widgets/profile_post_grid.dart';
 import '../widgets/profile_tab_delegate.dart';
 
+/// The main user profile presentation page view component.
+///
+/// Coordinates layouts for both own profile and public alternative profiles,
+/// orchestrating pull-to-refresh feeds, edit navigation, and social buttons.
 class ProfilePage extends StatelessWidget {
+  /// Callback executed when the user triggers the send message action block.
   final Function(UserProfile)? onMessagePressed;
+
+  /// Callback executed when an item tile inside the post grid layout is tapped.
   final Function(String postId)? onPostTapped;
 
+  /// Constructs an immutable [ProfilePage] instance with specific navigation parameters.
   const ProfilePage({super.key, this.onMessagePressed, this.onPostTapped});
 
   @override
@@ -31,6 +39,7 @@ class ProfilePage extends StatelessWidget {
         actions: [
           BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, state) {
+              // Safety validation to ensure the settings wheel strictly maps to own profiles
               if (state is ProfileLoadSuccess &&
                   state.isMe &&
                   GoRouterState.of(context).matchedLocation ==
@@ -61,6 +70,7 @@ class ProfilePage extends StatelessWidget {
                 context.read<ProfileBloc>().add(
                   ProfileRefreshRequested(userId: state.profile.id),
                 );
+                // Suspends the pull animation loop until background stream channels resolve
                 await context.read<ProfileBloc>().stream.firstWhere(
                   (state) => state is! ProfileLoading,
                 );

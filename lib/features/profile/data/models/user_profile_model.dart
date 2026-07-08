@@ -1,6 +1,10 @@
 import '../../domain/entities/user_profile.dart';
 
+/// Data model representing a user profile, extending the core [UserProfile] entity.
+///
+/// Handles serialization and deserialization from database JSON records.
 class UserProfileModel extends UserProfile {
+  /// Creates a [UserProfileModel] instance initialized with database properties.
   const UserProfileModel({
     required super.id,
     required super.username,
@@ -13,7 +17,10 @@ class UserProfileModel extends UserProfile {
     required super.isFollowing,
   });
 
-  /// Factory constructor to convert raw Supabase database rows into UserProfileModel.
+  /// Factory constructor to convert raw Supabase database rows into [UserProfileModel].
+  ///
+  /// Extracts counts safely converting [num] types to integers. The parameter
+  /// [isFollowing] tracks contextual social connections relative to the reader.
   factory UserProfileModel.fromJson(
     Map<String, dynamic> json, {
     required bool isFollowing,

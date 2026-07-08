@@ -7,7 +7,11 @@ import '../../../../core/theme/theme_extensions.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 
+/// Stateles presentation component managing system configuration entries and sessions.
+///
+/// Features adaptive display theme selectors and localized account termination gateways.
 class SettingsPage extends StatelessWidget {
+  /// Constructs a standard, structural [SettingsPage] instance.
   const SettingsPage({super.key});
 
   @override
@@ -102,6 +106,7 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
+  /// Displays a modal configuration confirmation overlay to securely manage signout tasks.
   void _showSignOutConfirmation(BuildContext context) {
     showDialog(
       context: context,

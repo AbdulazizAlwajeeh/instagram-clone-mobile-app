@@ -1,6 +1,9 @@
 import '../../../../core/posts/data/models/post_model.dart';
 import '../models/user_profile_model.dart';
 
+/// Remote data source contract handling all network transactions for user profiles.
+///
+/// This includes reading records, tracking relationships, and writing modifications.
 abstract class ProfileRemoteDataSource {
   /// Fetches a raw profile database record matching the provided [userId].
   ///

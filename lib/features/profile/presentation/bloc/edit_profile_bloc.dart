@@ -5,14 +5,21 @@ import '../../domain/usecases/edit_profile.dart';
 import 'edit_profile_event.dart';
 import 'edit_profile_state.dart';
 
+/// Custom event transformer to throttle rapid asynchronous lookups.
+///
+/// Prevents excessive network round-trips while a user interactively types.
 EventTransformer<Event> debounce<Event>(Duration duration) {
   return (events, mapper) => events.debounce(duration).switchMap(mapper);
 }
 
+/// Presentation business logic component governing the profile modification form.
+///
+/// Directs reactive username validation queries and manages data persistence updates.
 class EditProfileBloc extends Bloc<EditProfileEvent, EditProfileState> {
   final EditProfile _editProfile;
   final CheckUsernameAvailability _checkUsernameAvailability;
 
+  /// Creates an [EditProfileBloc] instance mapping events to respective async state emitters.
   EditProfileBloc({
     required EditProfile editProfile,
     required CheckUsernameAvailability checkUsernameAvailability,

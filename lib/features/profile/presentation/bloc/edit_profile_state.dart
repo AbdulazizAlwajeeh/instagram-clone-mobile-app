@@ -1,4 +1,6 @@
+/// Sealed base class representing all possible states for the profile modification screen.
 sealed class EditProfileState {
+  /// Base constant constructor for all profile modification states.
   const EditProfileState();
 }
 
@@ -22,7 +24,9 @@ class EditProfileSuccess extends EditProfileState {}
 
 /// State emitted when an error occurs during profile modification routines.
 class EditProfileFailure extends EditProfileState {
+  /// The user-facing error message describing the validation or transaction failure.
   final String errorMessage;
 
+  /// Creates an [EditProfileFailure] state with the required error description.
   const EditProfileFailure({required this.errorMessage});
 }

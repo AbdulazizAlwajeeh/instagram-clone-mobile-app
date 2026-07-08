@@ -3,6 +3,9 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/posts/domain/entities/post.dart';
 import '../entities/user_profile.dart';
 
+/// Contract definition for managing all profile data transactions and social actions.
+///
+/// Implemented within the data layer to handle communications with data sources.
 abstract class ProfileRepository {
   /// Retrieves a targeted public user profile by their distinct identification key.
   ///
@@ -40,5 +43,8 @@ abstract class ProfileRepository {
   });
 
   /// Verifies whether the specified [username] is free to use or already claimed.
+  ///
+  /// Returns a [Failure] on the left side if verification breaks, or a boolean
+  /// status on the right side (`true` if available, `false` if taken).
   Future<Either<Failure, bool>> checkUsernameAvailability(String username);
 }
