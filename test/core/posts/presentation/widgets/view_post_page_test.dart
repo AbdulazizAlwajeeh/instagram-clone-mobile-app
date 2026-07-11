@@ -3,10 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:yemengram/core/app_user/domain/entities/app_user.dart';
+import 'package:yemengram/core/posts/domain/entities/post.dart';
 import 'package:yemengram/core/posts/presentation/bloc/post_details_bloc.dart';
 import 'package:yemengram/core/posts/presentation/bloc/post_details_state.dart';
 import 'package:yemengram/core/posts/presentation/bloc/post_details_event.dart';
 import 'package:yemengram/core/posts/presentation/pages/view_post_page.dart';
+import 'package:yemengram/core/posts/presentation/widgets/post_card.dart';
 
 // Create a mock class implementing the Bloc contract for UI stream simulations
 class MockPostDetailBloc extends MockBloc<PostDetailEvent, PostDetailState>
@@ -16,8 +19,23 @@ void main() {
   late MockPostDetailBloc mockBloc;
   const tPostId = 'post_123';
 
+  final tPost = Post(
+    id: tPostId,
+    author: const AppUser(id: '1', email: 'e', username: 'u'),
+    mediaUrl: 'https://example.com',
+    likesCount: 5,
+    commentsCount: 2,
+    createdAt: DateTime.now(),
+    isLiked: false,
+    reportedByMe: false,
+  );
+
   setUp(() {
     mockBloc = MockPostDetailBloc();
+  });
+
+  setUpAll(() {
+    registerFallbackValue(const PostReportSubmitted(postId: ''));
   });
 
   // Helper utility to wrap your widget with MaterialApp and the injected Bloc provider dependency
@@ -82,4 +100,82 @@ void main() {
       },
     );
   });
+
+  testWidgets(
+    'should render error SnackBar when state stream emits ReportingPostFailure side-effect',
+    (WidgetTester tester) async {
+      // Stream must start with an initial UI-rendering state, then transition to failure to fire the listener
+      whenListen<PostDetailState>(
+        mockBloc,
+        Stream.fromIterable([
+          ReportingPostSuccess(tPost, const []),
+          const ReportingPostFailure('Database timeout error', null, []),
+        ]),
+        initialState: ReportingPostSuccess(tPost, const []),
+      );
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester
+          .pumpAndSettle(); // Complete SnackBar presentation animation frames
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Database timeout error'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'should render success SnackBar when state stream emits ReportingPostSuccess with reportedByMe true',
+    (WidgetTester tester) async {
+      final reportedPost = tPost.copyWith(reportedByMe: true);
+
+      whenListen<PostDetailState>(
+        mockBloc,
+        Stream.fromIterable([
+          ReportingPostSuccess(tPost, const []),
+          ReportingPostSuccess(reportedPost, const []),
+        ]),
+        initialState: ReportingPostSuccess(tPost, const []),
+      );
+
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Post successfully reported.'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'should dispatch PostReportSubmitted event to Bloc when report option item is tapped inside options sheet',
+    (WidgetTester tester) async {
+      // Stub the current state to safely draw the baseline PostCard component
+      when(
+        () => mockBloc.state,
+      ).thenReturn(ReportingPostSuccess(tPost, const []));
+
+      await tester.pumpWidget(createWidgetUnderTest());
+
+      // Find and tap your PostCard more option toggle button layout to reveal sheet options
+      final moreButton = find.byIcon(Icons.more_vert);
+      if (moreButton.evaluate().isNotEmpty) {
+        await tester.tap(moreButton);
+      } else {
+        await tester.tap(find.byType(PostCard));
+      }
+      await tester
+          .pumpAndSettle(); // Complete modal slide-up transition timeline
+
+      final reportOption = find.text('Report Post');
+      expect(reportOption, findsOneWidget);
+      await tester.tap(reportOption);
+      await tester.pump();
+
+      // 1. Capture the exact object that was passed into the add() function
+      final captured = verify(() => mockBloc.add(captureAny())).captured;
+      expect(captured.isNotEmpty, isTrue);
+
+      final dispatchedEvent = captured.first as PostReportSubmitted;
+      expect(dispatchedEvent.postId, tPostId);
+    },
+  );
 }

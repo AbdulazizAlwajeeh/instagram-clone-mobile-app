@@ -251,7 +251,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
         ),
       ),
       // On structural success, solidify the state by transitioning safely into a permanent Success block
-      (_) => emit(PostDetailSuccess(mutatedPost, comments: existingComments)),
+      (_) => emit(ReportingPostSuccess(mutatedPost, existingComments)),
     );
   }
 }

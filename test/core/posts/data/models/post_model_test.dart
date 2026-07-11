@@ -115,6 +115,7 @@ void main() {
             commentsCount: 3,
             createdAt: DateTime.parse('2026-06-30T12:00:00Z'),
             isLiked: false,
+            reportedByMe: false,
           );
 
           final result = postModel.toJson();

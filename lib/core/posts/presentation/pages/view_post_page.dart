@@ -29,7 +29,7 @@ class ViewPostPage extends StatelessWidget {
     return BlocListener<PostDetailBloc, PostDetailState>(
       // 1. Intercept states that cause non-visual side effects (snackbars, navigation)
       listenWhen: (previous, current) =>
-          current is ReportingPostFailure || current is PostDetailSuccess,
+          current is ReportingPostFailure || current is ReportingPostSuccess,
       listener: (context, state) {
         if (state is ReportingPostFailure) {
           ScaffoldMessenger.of(context).showSnackBar(

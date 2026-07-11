@@ -1,56 +1,42 @@
-import 'package:fpdart/fpdart.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:yemengram/core/app_user/domain/entities/app_user.dart';
 import 'package:yemengram/core/error/failures.dart';
-import 'package:yemengram/core/posts/domain/entities/post.dart';
 import 'package:yemengram/core/posts/domain/repositories/post_detail_repository.dart';
-import 'package:yemengram/core/posts/domain/usecases/get_post_by_id.dart';
+import 'package:yemengram/core/posts/domain/usecases/report_post.dart';
 
 // Create a mock class implementing the repository interface contract
 class MockPostDetailRepository extends Mock implements PostDetailRepository {}
 
 void main() {
-  late GetPostById useCase;
+  late ReportPost useCase;
   late MockPostDetailRepository mockRepository;
 
   // Runs before every individual test to guarantee a fresh slate
   setUp(() {
     mockRepository = MockPostDetailRepository();
-    useCase = GetPostById(mockRepository);
+    useCase = ReportPost(mockRepository);
   });
 
   const tPostId = 'post_123';
 
-  // Dummy post instance used for successful response configurations
-  final tPost = Post(
-    id: tPostId,
-    author: const AppUser(id: '1', email: 'e', username: 'u'),
-    mediaUrl: 'https://example.com',
-    likesCount: 0,
-    commentsCount: 0,
-    createdAt: DateTime.now(),
-    isLiked: false,
-    reportedByMe: false,
-  );
-
-  group('GetPostById UseCase Tests', () {
+  group('ReportPost UseCase Tests', () {
     test(
-      'should return Right(Post) from repository on a successful fetch cycle',
+      'should return Right(unit) from repository on a successful report submittal cycle',
       () async {
         // Arrange
         when(
-          () => mockRepository.getPostById(tPostId),
-        ).thenAnswer((_) async => Right(tPost));
+          () => mockRepository.reportPost(postId: tPostId),
+        ).thenAnswer((_) async => const Right(unit));
 
         // Act
         final result = await useCase(tPostId);
 
         // Assert
-        expect(result, Right(tPost));
+        expect(result, const Right(unit));
 
         // Verify that the repository method was actually called exactly once
-        verify(() => mockRepository.getPostById(tPostId)).called(1);
+        verify(() => mockRepository.reportPost(postId: tPostId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       },
     );
@@ -59,9 +45,9 @@ void main() {
       'should return Left(ServerFailure) from repository when operational call fails',
       () async {
         // Arrange
-        const tFailure = ServerFailure('Database timeout error');
+        const tFailure = ServerFailure('Post already reported');
         when(
-          () => mockRepository.getPostById(tPostId),
+          () => mockRepository.reportPost(postId: tPostId),
         ).thenAnswer((_) async => const Left(tFailure));
 
         // Act
@@ -69,7 +55,7 @@ void main() {
 
         // Assert
         expect(result, const Left(tFailure));
-        verify(() => mockRepository.getPostById(tPostId)).called(1);
+        verify(() => mockRepository.reportPost(postId: tPostId)).called(1);
         verifyNoMoreInteractions(mockRepository);
       },
     );

@@ -9,6 +9,7 @@ import 'package:yemengram/core/posts/domain/entities/comment.dart';
 import 'package:yemengram/core/posts/domain/usecases/add_comment.dart';
 import 'package:yemengram/core/posts/domain/usecases/get_post_by_id.dart';
 import 'package:yemengram/core/posts/domain/usecases/get_post_comments.dart';
+import 'package:yemengram/core/posts/domain/usecases/report_post.dart';
 import 'package:yemengram/core/posts/domain/usecases/toggle_lilke_post.dart';
 import 'package:yemengram/core/posts/presentation/bloc/post_details_bloc.dart';
 import 'package:yemengram/core/posts/presentation/bloc/post_details_event.dart';
@@ -22,12 +23,15 @@ class MockGetPostComments extends Mock implements GetPostComments {}
 
 class MockAddComment extends Mock implements AddComment {}
 
+class MockReportPost extends Mock implements ReportPost {}
+
 void main() {
   late PostDetailBloc bloc;
   late MockGetPostById mockGetPostById;
   late MockToggleLikePost mockToggleLikePost;
   late MockGetPostComments mockGetPostComments;
   late MockAddComment mockAddComment;
+  late MockReportPost mockReportPost;
 
   const tPostId = 'post_123';
 
@@ -39,6 +43,7 @@ void main() {
     commentsCount: 2,
     createdAt: DateTime.now(),
     isLiked: false,
+    reportedByMe: false,
   );
 
   final tComments = [
@@ -58,12 +63,14 @@ void main() {
     mockToggleLikePost = MockToggleLikePost();
     mockGetPostComments = MockGetPostComments();
     mockAddComment = MockAddComment();
+    mockReportPost = MockReportPost();
 
     bloc = PostDetailBloc(
       getPostById: mockGetPostById,
       toggleLikePost: mockToggleLikePost,
       getPostComments: mockGetPostComments,
       addComment: mockAddComment,
+      reportPost: mockReportPost,
     );
   });
 
@@ -147,6 +154,87 @@ void main() {
         final successState = b.state as PostDetailSuccess;
         final Post finalPost = successState.post as Post;
         expect(finalPost.commentsCount, 3);
+      },
+    );
+  });
+
+  group('_handleReportPost execution routing lifecycle', () {
+    blocTest<PostDetailBloc, PostDetailState>(
+      'should emit [ReportingPostInProgress, ReportingPostSuccess] with '
+      'mutated reportedByMe flag when submittal completes successfully',
+      build: () {
+        when(
+          () => mockReportPost(tPostId),
+        ).thenAnswer((_) async => const Right(unit));
+        return bloc;
+      },
+      // Seeding a valid success state to extract baseline post and comment collections
+      seed: () => PostDetailSuccess(
+        tPost.copyWith(reportedByMe: false),
+        comments: tComments,
+      ),
+      act: (b) => b.add(const PostReportSubmitted(postId: tPostId)),
+      expect: () => [
+        isA<ReportingPostInProgress>().having(
+          (s) => (s.post as Post).reportedByMe,
+          'optimistic reportedByMe flag',
+          true,
+        ),
+        isA<ReportingPostSuccess>().having(
+          (s) => (s.post as Post).reportedByMe,
+          'permanent reportedByMe flag',
+          true,
+        ),
+      ],
+      verify: (_) {
+        verify(() => mockReportPost(tPostId)).called(1);
+      },
+    );
+
+    blocTest<PostDetailBloc, PostDetailState>(
+      'should emit [ReportingPostInProgress, ReportingPostFailure] and roll back to original unmutated post on execution crashes',
+      build: () {
+        when(() => mockReportPost(tPostId)).thenAnswer(
+          (_) async =>
+              const Left(ServerFailure('Backend rejected report workflow')),
+        );
+        return bloc;
+      },
+      seed: () => PostDetailSuccess(
+        tPost.copyWith(reportedByMe: false),
+        comments: tComments,
+      ),
+      act: (b) => b.add(const PostReportSubmitted(postId: tPostId)),
+      expect: () => [
+        isA<ReportingPostInProgress>(),
+        isA<ReportingPostFailure>()
+            .having(
+              (s) => (s.post as Post).reportedByMe,
+              'rolled-back reportedByMe flag',
+              false,
+            )
+            .having(
+              (s) => s.errorMessage,
+              'failure breakdown description text',
+              'Backend rejected report workflow',
+            ),
+      ],
+      verify: (_) {
+        verify(() => mockReportPost(tPostId)).called(1);
+      },
+    );
+
+    blocTest<PostDetailBloc, PostDetailState>(
+      'should instantly break and return empty stream without emitting anything if state is already ReportingPostInProgress',
+      build: () {
+        return bloc;
+      },
+      // Seeding the debouncer state to invoke the active operational block guard path
+      seed: () => ReportingPostInProgress(tPost, tComments),
+      act: (b) => b.add(const PostReportSubmitted(postId: tPostId)),
+      expect: () => <PostDetailState>[],
+      verify: (_) {
+        verifyNever(() => mockReportPost(tPostId));
       },
     );
   });

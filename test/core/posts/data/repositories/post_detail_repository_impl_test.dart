@@ -31,6 +31,7 @@ void main() {
     commentsCount: 0,
     createdAt: DateTime.now(),
     isLiked: false,
+    reportedByMe: false,
   );
 
   final tCommentModels = [
@@ -248,5 +249,75 @@ void main() {
         },
       );
     });
+  });
+
+  group('reportPost execution routing', () {
+    test(
+      'should return Right(unit) when remote report operation completes successfully',
+      () async {
+        // Arrange
+        when(
+          () => mockRemoteDataSource.reportPost(postId: tPostId),
+        ).thenAnswer((_) async => Future<void>.value());
+
+        // Act
+        final result = await repository.reportPost(postId: tPostId);
+
+        // Assert
+        expect(result, const Right(unit));
+        verify(
+          () => mockRemoteDataSource.reportPost(postId: tPostId),
+        ).called(1);
+      },
+    );
+
+    test(
+      'should catch ServerException and map it to Left(ServerFailure) on backend reporting failures',
+      () async {
+        // Arrange
+        when(
+          () => mockRemoteDataSource.reportPost(postId: tPostId),
+        ).thenThrow(const ServerException('Post already reported'));
+
+        // Act
+        final result = await repository.reportPost(postId: tPostId);
+
+        // Assert
+        expect(result.isLeft(), isTrue);
+        result.fold(
+          (failure) => expect(failure.message, 'Post already reported'),
+          (_) =>
+              fail('Should not return Right unit data on exception rejections'),
+        );
+        verify(
+          () => mockRemoteDataSource.reportPost(postId: tPostId),
+        ).called(1);
+      },
+    );
+
+    test(
+      'should catch unexpected generic exceptions and return Left(ServerFailure) containing the raw string text description',
+      () async {
+        // Arrange
+        when(
+          () => mockRemoteDataSource.reportPost(postId: tPostId),
+        ).thenThrow(Exception('Timeout connection error'));
+
+        // Act
+        final result = await repository.reportPost(postId: tPostId);
+
+        // Assert
+        expect(result.isLeft(), isTrue);
+        result.fold(
+          (failure) =>
+              expect(failure.message, 'Exception: Timeout connection error'),
+          (_) =>
+              fail('Should not return Right data on generic exception crashes'),
+        );
+        verify(
+          () => mockRemoteDataSource.reportPost(postId: tPostId),
+        ).called(1);
+      },
+    );
   });
 }
