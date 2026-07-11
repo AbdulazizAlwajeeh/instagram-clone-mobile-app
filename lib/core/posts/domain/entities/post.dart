@@ -29,6 +29,12 @@ class Post {
   /// Flag indicating whether the currently authenticated user session has liked this post.
   final bool isLiked;
 
+  /// Flag indicating whether the currently authenticated user session has reported this post.
+  ///
+  /// Used conditionally across views to filter content out of the Explore tab,
+  /// while keeping it visible with warning markers inside the Profile tab.
+  final bool reportedByMe;
+
   /// Creates an immutable [Post] domain entity instance.
   const Post({
     required this.id,
@@ -39,6 +45,7 @@ class Post {
     required this.commentsCount,
     required this.createdAt,
     required this.isLiked,
+    required this.reportedByMe,
   });
 
   /// Creates a copy of this [Post] with altered parameters while retaining unmodified values.
@@ -54,6 +61,7 @@ class Post {
     int? commentsCount,
     DateTime? createdAt,
     bool? isLiked,
+    bool? reportedByMe,
   }) {
     return Post(
       id: id ?? this.id,
@@ -65,6 +73,7 @@ class Post {
       commentsCount: commentsCount ?? this.commentsCount,
       createdAt: createdAt ?? this.createdAt,
       isLiked: isLiked ?? this.isLiked,
+      reportedByMe: reportedByMe ?? this.reportedByMe,
     );
   }
 }

@@ -17,6 +17,7 @@ class PostModel extends Post {
     required super.commentsCount,
     required super.createdAt,
     required super.isLiked,
+    required super.reportedByMe,
   });
 
   /// Factory constructor to convert a Supabase multi-table join JSON payload
@@ -32,6 +33,12 @@ class PostModel extends Post {
         likesList.first['count'] != null &&
         likesList.first['count'] > 0;
 
+    // Safe evaluation: Handle the dynamic list returned by post_reports
+    final reportedList = json['reported_by_me'] as List<dynamic>? ?? const [];
+
+    // If the list is not empty, it means this specific user has a report record for this post
+    final bool userHasReported = reportedList.isNotEmpty;
+
     return PostModel(
       id: json['id'] as String,
       author: AppUserModel.fromJson(userData),
@@ -43,6 +50,7 @@ class PostModel extends Post {
       // Supabase returns timestamptz as an ISO 8601 string, so we parse it here
       createdAt: DateTime.parse(json['created_at'] as String),
       isLiked: userHasLiked,
+      reportedByMe: userHasReported,
     );
   }
 
@@ -61,6 +69,7 @@ class PostModel extends Post {
       commentsCount: json['comments_count'] as int,
       createdAt: DateTime.parse(json['created_at'] as String),
       isLiked: json['is_liked'] ?? false,
+      reportedByMe: json['reported_by_me'] as bool? ?? false,
     );
   }
 
