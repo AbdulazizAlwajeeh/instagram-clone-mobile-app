@@ -63,3 +63,52 @@ class PostDetailFailure extends PostDetailState {
     this.comments = const [],
   });
 }
+
+/// Represents an active background execution timeline for a post report.
+///
+/// Retains the active datasets to preserve continuous visual rendering
+/// while the database insertion request executes asynchronously.
+class ReportingPostInProgress extends PostDetailState {
+  /// The active post data payload (already optimistically mutated client-side).
+  final dynamic post;
+
+  /// The active comment thread data collection.
+  final List<Comment> comments;
+
+  /// Creates a transient reporting state instance with continuous cache retention.
+  const ReportingPostInProgress(this.post, this.comments);
+}
+
+/// Represents a failed report submission timeline.
+///
+/// Holds the error description alongside the restored post data cache
+/// to trigger feedback rollbacks in the presentation layer.
+class ReportingPostFailure extends PostDetailState {
+  /// The user-friendly error message detailing the reason for execution failure.
+  final String errorMessage;
+
+  /// The original post data payload (rolled back to its pre-report status).
+  final dynamic post;
+
+  /// The active comment thread data collection preserved during the failure event.
+  final List<Comment> comments;
+
+  /// Creates a reporting failure state containing the [errorMessage] and cached content data.
+  const ReportingPostFailure(this.errorMessage, this.post, this.comments);
+}
+
+/// Represents a finalized, successful post report submission timeline.
+///
+/// Dispatched strictly upon verified completion of the database report insertion.
+/// Signals presentation consumers to trigger structural side effects, such as
+/// closing contextual overlay views or routing the user away from the reported node.
+class ReportingPostSuccess extends PostDetailState {
+  /// The newly mutated post data payload reflecting updated security flags.
+  final dynamic post;
+
+  /// The active comment thread data collection preserved during the success event.
+  final List<Comment> comments;
+
+  /// Creates a finalized reporting success state containing the updated [post] content data.
+  const ReportingPostSuccess(this.post, this.comments);
+}

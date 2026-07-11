@@ -21,6 +21,7 @@ import 'core/posts/data/datasoucres/post_detail_remote_data_source_impl.dart';
 import 'core/posts/data/repositories/post_detail_repository_impl.dart';
 import 'core/posts/domain/repositories/post_detail_repository.dart';
 import 'core/posts/domain/usecases/get_post_by_id.dart';
+import 'core/posts/domain/usecases/report_post.dart';
 import 'core/posts/domain/usecases/toggle_lilke_post.dart';
 import 'core/posts/presentation/bloc/post_details_bloc.dart';
 import 'core/router/app_router.dart';
@@ -267,6 +268,9 @@ void _initPostDetail() {
   serviceLocator.registerFactory(
     () => AddComment(serviceLocator<PostDetailRepository>()),
   );
+  serviceLocator.registerFactory(
+    () => ReportPost(serviceLocator<PostDetailRepository>()),
+  );
 
   // 4. Presentation BLoC Factory
   // Registered as a factory so each time a user opens a post, a fresh BLoC/state instance is built
@@ -276,6 +280,7 @@ void _initPostDetail() {
       toggleLikePost: serviceLocator<ToggleLikePost>(),
       getPostComments: serviceLocator<GetPostComments>(),
       addComment: serviceLocator<AddComment>(),
+      reportPost: serviceLocator<ReportPost>(),
     ),
   );
 }

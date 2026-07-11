@@ -47,3 +47,9 @@ class PostDetailCommentSubmitted extends PostDetailEvent {
   const PostDetailCommentSubmitted({required String postId, required this.text})
     : super(postId);
 }
+
+/// Dispatched when the user executes a content report submission against the post.
+class PostReportSubmitted extends PostDetailEvent {
+  /// Creates a report submission event targeting a specific [postId].
+  const PostReportSubmitted({required String postId}) : super(postId);
+}

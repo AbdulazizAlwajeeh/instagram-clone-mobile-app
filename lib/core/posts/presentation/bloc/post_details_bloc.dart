@@ -6,6 +6,7 @@ import '../../domain/entities/comment.dart';
 import '../../domain/usecases/add_comment.dart';
 import '../../domain/usecases/get_post_by_id.dart';
 import '../../domain/usecases/get_post_comments.dart';
+import '../../domain/usecases/report_post.dart';
 import '../../domain/usecases/toggle_lilke_post.dart';
 
 /// Presentation-layer Bloc coordinating detail view lifecycles for individual posts.
@@ -19,6 +20,7 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
   final ToggleLikePost _toggleLikePost;
   final GetPostComments _getPostComments;
   final AddComment _addComment;
+  final ReportPost _reportPostUseCase;
 
   /// Creates a [PostDetailBloc] instance with all domain interactions explicitly injected.
   PostDetailBloc({
@@ -26,10 +28,12 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
     required ToggleLikePost toggleLikePost,
     required GetPostComments getPostComments,
     required AddComment addComment,
+    required ReportPost reportPost,
   }) : _getPostById = getPostById,
        _toggleLikePost = toggleLikePost,
        _getPostComments = getPostComments,
        _addComment = addComment,
+       _reportPostUseCase = reportPost,
        super(const PostDetailInitial()) {
     on<PostDetailEvent>((event, emit) async {
       // 1. Safely extract existing data from whichever state is active
@@ -39,6 +43,9 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
         PostDetailLoading(post: final p) => p,
         PostDetailSuccess(post: final p) => p,
         PostDetailFailure(post: final p) => p,
+        ReportingPostInProgress(post: final p) => p,
+        ReportingPostFailure(post: final p) => p,
+        ReportingPostSuccess(post: final p) => p,
       };
 
       final List<Comment> existingComments = switch (state) {
@@ -46,6 +53,9 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
         PostDetailLoading(comments: final c) => c,
         PostDetailSuccess(comments: final c) => c,
         PostDetailFailure(comments: final c) => c,
+        ReportingPostInProgress(comments: final c) => c,
+        ReportingPostFailure(comments: final c) => c,
+        ReportingPostSuccess(comments: final c) => c,
       };
 
       // 2. Separate logic based on the incoming event class type
@@ -88,6 +98,14 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
           await _handleSubmitComment(
             event.postId,
             event.text,
+            existingPost,
+            existingComments,
+            emit,
+          );
+
+        case PostReportSubmitted():
+          await _handleReportPost(
+            event.postId,
             existingPost,
             existingComments,
             emit,
@@ -194,6 +212,46 @@ class PostDetailBloc extends Bloc<PostDetailEvent, PostDetailState> {
         // Fetch fresh rows to add the brand new comment inside the bottom sheet instantly
         add(PostDetailCommentsFetchRequested(postId: postId));
       },
+    );
+  }
+
+  Future<void> _handleReportPost(
+    String postId,
+    dynamic existingPost,
+    List<Comment> existingComments,
+    Emitter<PostDetailState> emit,
+  ) async {
+    // Guard against concurrent double-tap spamming while a report is actively in-flight
+    if (state is ReportingPostInProgress) {
+      return;
+    }
+
+    // Optimistically update the post entity model in client-side memory
+    dynamic mutatedPost = existingPost;
+    if (existingPost != null) {
+      try {
+        mutatedPost = (existingPost as Post).copyWith(reportedByMe: true);
+      } catch (_) {}
+    }
+
+    // Instantly transition to the progress state to allow the UI layer to update optimistically
+    emit(ReportingPostInProgress(mutatedPost, existingComments));
+
+    // Dispatch the payload request down into the core domain layer usecase execution timeline
+    final failureOrUnit = await _reportPostUseCase(postId);
+
+    failureOrUnit.fold(
+      // On network failure, roll back the visual layer instantly to the original un-reported post state
+      (failure) => emit(
+        ReportingPostFailure(
+          failure.message,
+          // Restores the pre-mutation baseline post payload data
+          existingPost,
+          existingComments,
+        ),
+      ),
+      // On structural success, solidify the state by transitioning safely into a permanent Success block
+      (_) => emit(PostDetailSuccess(mutatedPost, comments: existingComments)),
     );
   }
 }
