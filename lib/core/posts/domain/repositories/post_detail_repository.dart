@@ -39,4 +39,11 @@ abstract class PostDetailRepository {
     required String postId,
     required String text,
   });
+
+  /// Sends a moderation report for a specific post to the backend infrastructure.
+  ///
+  /// Accepts the target [postId].
+  /// Returns a [Unit] wrapped inside a [Right] on success.
+  /// Returns a [Failure] wrapped inside a [Left] if a network or server anomaly occurs.
+  Future<Either<Failure, Unit>> reportPost({required String postId});
 }

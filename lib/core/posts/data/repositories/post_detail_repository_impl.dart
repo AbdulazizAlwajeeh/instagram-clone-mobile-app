@@ -68,4 +68,16 @@ class PostDetailRepositoryImpl implements PostDetailRepository {
       return Left(ServerFailure(error.toString()));
     }
   }
+
+  @override
+  Future<Either<Failure, Unit>> reportPost({required String postId}) async {
+    try {
+      await _remoteDataSource.reportPost(postId: postId);
+      return const Right(unit);
+    } on ServerException catch (exception) {
+      return Left(ServerFailure(exception.message));
+    } catch (error) {
+      return Left(ServerFailure(error.toString()));
+    }
+  }
 }
