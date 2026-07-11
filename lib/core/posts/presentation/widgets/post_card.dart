@@ -23,6 +23,10 @@ class PostCard extends StatelessWidget {
   /// User action notification callback dispatched upon tapping user profile handles or avatars.
   final VoidCallback onProfileTapped;
 
+  /// User action notification callback dispatched upon tapping options/more
+  /// icon button.
+  final VoidCallback onMoreTapped;
+
   /// Creates a unified [PostCard] layout view container.
   const PostCard({
     super.key,
@@ -30,6 +34,7 @@ class PostCard extends StatelessWidget {
     required this.onLikeTapped,
     required this.onCommentTapped,
     required this.onProfileTapped,
+    required this.onMoreTapped,
   });
 
   @override
@@ -42,6 +47,7 @@ class PostCard extends StatelessWidget {
           username: post.author.username,
           userAvatarUrl: post.author.avatarUrl,
           onProfileTapped: onProfileTapped,
+          onMoreTapped: onMoreTapped,
         ),
         // 2. Main Media Viewer Canvas
         PostCardImage(imageUrl: post.mediaUrl),

@@ -66,7 +66,7 @@ class PostCardHeader extends StatelessWidget {
             // 3. Overflow Action Option Button
             IconButton(
               icon: const Icon(Icons.more_vert),
-              onPressed: onMoreTapped ?? () {},
+              onPressed: onMoreTapped,
             ),
           ],
         ),
