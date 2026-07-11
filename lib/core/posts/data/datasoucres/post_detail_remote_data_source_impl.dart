@@ -1,6 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/error/exceptions.dart';
-import '../../../../core/posts/domain/entities/post.dart';
 import '../models/comment_model.dart';
 import '../models/post_model.dart';
 import 'post_detail_remote_data_source.dart';
@@ -17,7 +16,7 @@ class PostDetailRemoteDataSourceImpl implements PostDetailRemoteDataSource {
   const PostDetailRemoteDataSourceImpl(this._supabaseClient);
 
   @override
-  Future<Post> getPostById(String postId) async {
+  Future<PostModel> getPostById(String postId) async {
     try {
       final currentUserId = _supabaseClient.auth.currentUser?.id;
 
@@ -31,11 +30,13 @@ class PostDetailRemoteDataSourceImpl implements PostDetailRemoteDataSource {
           username,
           avatar_url
         ),
-        likes:likes(count)
+        likes:likes(count),
+        reported_by_me:post_reports(reporter_id)
       ''')
           .eq('id', postId)
           // Ensures the detail view also knows if the viewer liked this specific post
           .eq('likes.user_id', currentUserId ?? '')
+          .eq('reported_by_me.reporter_id', currentUserId ?? '')
           .single();
 
       // Map the returned Map<String, dynamic> using your Post model factory
@@ -138,6 +139,24 @@ class PostDetailRemoteDataSourceImpl implements PostDetailRemoteDataSource {
         'post_id': postId,
         'user_id': currentUserId,
         'message': text,
+      });
+    } on PostgrestException catch (error) {
+      throw ServerException(error.message);
+    } catch (error) {
+      throw ServerException(error.toString());
+    }
+  }
+
+  @override
+  Future<void> reportPost({required String postId}) async {
+    try {
+      final currentUserId = _supabaseClient.auth.currentUser?.id;
+      if (currentUserId == null) {
+        throw const ServerException('User authentication session not found.');
+      }
+      await _supabaseClient.from('post_reports').insert({
+        'post_id': postId,
+        'reporter_id': currentUserId,
       });
     } on PostgrestException catch (error) {
       throw ServerException(error.message);

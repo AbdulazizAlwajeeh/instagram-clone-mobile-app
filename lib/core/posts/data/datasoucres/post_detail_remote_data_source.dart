@@ -1,4 +1,4 @@
-import '../../../../core/posts/domain/entities/post.dart';
+import 'package:yemengram/core/posts/data/models/post_model.dart';
 import '../models/comment_model.dart';
 
 /// Contract for the remote data source handling detailed interactions for posts.
@@ -10,9 +10,9 @@ abstract class PostDetailRemoteDataSource {
   /// Queries the Supabase database to locate a single post by identification key.
   ///
   /// Takes a unique [postId] string to look up the specific record.
-  /// Returns a [Future] containing the [Post] entity matching the ID.
+  /// Returns a [Future] containing the [PostModel] matching the ID.
   /// Throws a [ServerException] if the query fails or data is missing.
-  Future<Post> getPostById(String postId);
+  Future<PostModel> getPostById(String postId);
 
   /// Executes an RPC or handles a toggle transaction for liking a post in Supabase.
   ///
@@ -34,4 +34,11 @@ abstract class PostDetailRemoteDataSource {
   /// Associates the input data with the currently active user session on the backend.
   /// Throws a [ServerException] if the database operation or authentication fails.
   Future<void> addComment({required String postId, required String text});
+
+  /// Dispatches a new report entry for a post to the remote Supabase database.
+  ///
+  /// Requires the specific [postId] being reported.
+  /// Throws a [ServerException] if the network connection drops or if the
+  /// insertion violates database integrity constraints.
+  Future<void> reportPost({required String postId});
 }
