@@ -1,5 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/app_user/presentation/cubit/current_user_cubit.dart';
+import '../../../../core/notifications/domain/usecases/register_device_token'
+    '.dart';
+import '../../../../core/notifications/domain/usecases'
+    '/unregister_device_token.dart';
 import '../../domain/usecases/get_current_user.dart';
 import '../../domain/usecases/user_sign_in.dart';
 import '../../domain/usecases/user_sign_out.dart';
@@ -18,6 +22,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetCurrentUser _getCurrentUser;
   final UserSignOut _userSignOut;
   final CurrentUserCubit _currentUserCubit;
+  final RegisterDeviceToken _registerDeviceToken;
+  final UnregisterDeviceToken _unregisterDeviceToken;
 
   /// Instantiates the core authentication supervisor framework and registers granular event mappings.
   AuthBloc({
@@ -26,11 +32,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required GetCurrentUser getCurrentUser,
     required UserSignOut userSignOut,
     required CurrentUserCubit currentUserCubit,
+    required RegisterDeviceToken registerDeviceToken,
+    required UnregisterDeviceToken unregisterDeviceToken,
   }) : _userSignUp = userSignUp,
        _userSignIn = userSignIn,
        _getCurrentUser = getCurrentUser,
        _userSignOut = userSignOut,
        _currentUserCubit = currentUserCubit,
+       _registerDeviceToken = registerDeviceToken,
+       _unregisterDeviceToken = unregisterDeviceToken,
        super(AuthInitial()) {
     on<AuthSignUp>(_onSignUp);
     on<AuthSignIn>(_onSignIn);
@@ -65,9 +75,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       SignInParams(email: event.email, password: event.password),
     );
 
-    result.fold((failure) => emit(AuthFailure(failure.message)), (user) {
+    await result.fold((failure) async => emit(AuthFailure(failure.message)), (
+      user,
+    ) async {
       // Hydrates the long-running application-wide session scope tracker.
       _currentUserCubit.updateUser(user);
+
+      // Plant Core Notification Sync: Done after user session is established.
+      // Soft failure strategy ensures notification permission denial never locks the user out.
+      await _registerDeviceToken(NoParams());
+
       emit(AuthSuccess(user));
     });
   }
@@ -98,6 +115,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// Triggers a complete network session tear-down and flushes locally active credentials matrices.
   Future<void> _onSignOut(AuthSignOut event, Emitter<AuthState> emit) async {
     emit(AuthLoading());
+
+    // Plant Pre-emptive Token Unregistration: Executed BEFORE dropping the Supabase
+    // auth token to prevent Row-Level Security (RLS) tracking constraint failures.
+    await _unregisterDeviceToken(NoParams());
 
     final result = await _userSignOut(NoParams());
 

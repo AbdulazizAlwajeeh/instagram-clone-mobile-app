@@ -5,6 +5,8 @@ import 'package:mocktail/mocktail.dart';
 import 'package:yemengram/core/app_user/domain/entities/app_user.dart';
 import 'package:yemengram/core/app_user/presentation/cubit/current_user_cubit.dart';
 import 'package:yemengram/core/error/failures.dart' as failure;
+import 'package:yemengram/core/notifications/domain/usecases/register_device_token.dart';
+import 'package:yemengram/core/notifications/domain/usecases/unregister_device_token.dart';
 import 'package:yemengram/core/usecase/usecase.dart';
 import 'package:yemengram/features/auth/domain/usecases/get_current_user.dart';
 import 'package:yemengram/features/auth/domain/usecases/user_sign_in.dart';
@@ -24,6 +26,10 @@ class MockUserSignOut extends Mock implements UserSignOut {}
 
 class MockCurrentUserCubit extends Mock implements CurrentUserCubit {}
 
+class MockRegisterDeviceToken extends Mock implements RegisterDeviceToken {}
+
+class MockUnregisterDeviceToken extends Mock implements UnregisterDeviceToken {}
+
 void main() {
   late AuthBloc authBloc;
   late MockUserSignUp mockUserSignUp;
@@ -31,6 +37,8 @@ void main() {
   late MockGetCurrentUser mockGetCurrentUser;
   late MockUserSignOut mockUserSignOut;
   late MockCurrentUserCubit mockCurrentUserCubit;
+  late MockRegisterDeviceToken mockRegisterDeviceToken;
+  late MockUnregisterDeviceToken mockUnregisterDeviceToken;
 
   const tEmail = 'test@example.com';
   const tPassword = 'password123';
@@ -45,6 +53,8 @@ void main() {
     mockGetCurrentUser = MockGetCurrentUser();
     mockUserSignOut = MockUserSignOut();
     mockCurrentUserCubit = MockCurrentUserCubit();
+    mockRegisterDeviceToken = MockRegisterDeviceToken();
+    mockUnregisterDeviceToken = MockUnregisterDeviceToken();
 
     authBloc = AuthBloc(
       userSignUp: mockUserSignUp,
@@ -52,6 +62,8 @@ void main() {
       getCurrentUser: mockGetCurrentUser,
       userSignOut: mockUserSignOut,
       currentUserCubit: mockCurrentUserCubit,
+      registerDeviceToken: mockRegisterDeviceToken,
+      unregisterDeviceToken: mockUnregisterDeviceToken,
     );
   });
 
