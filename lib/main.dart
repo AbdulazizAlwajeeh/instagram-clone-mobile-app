@@ -1,3 +1,5 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,11 +12,33 @@ import 'core/theme/presentation/bloc/theme_bloc.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
 
+// This annotation ensures the Flutter compiler does not delete this function
+// during production builds, allowing the native Android system to find it.
+@pragma('vm:entry-point')
+// This top-level function runs in a completely separate background isolate.
+// It wakes up to process incoming data payloads when the app is closed.
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // We must re-initialize Firebase inside this separate background process
+  // because it does not share the same memory space as the main app UI.
+  await Firebase.initializeApp();
+
+  if (kDebugMode) {
+    print("📩 Background message received: ${message.messageId}");
+  }
+}
+
 void main() async {
   // Required by the framework to perform asynchronous initializations before rendering UI
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
+    // Connects our Flutter app to the underlying native Firebase engine.
+    await Firebase.initializeApp();
+
+    // Registers our background function with the Firebase Cloud Messaging library
+    // so the OS knows exactly who to notify when a new background push arrives.
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
     await initDependencies();
 
     // Optional: Log successful startup flow only while building locally
