@@ -62,6 +62,8 @@ class ProfileAvatarPicker extends StatelessWidget {
     final XFile? image = await picker.pickImage(
       source: source,
       imageQuality: 80, // Compression layer optimization
+      maxHeight: 1080,
+      maxWidth: 1920,
     );
 
     if (image != null) {

@@ -33,6 +33,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
       final XFile? pickedFile = await _picker.pickImage(
         source: source,
         imageQuality: 80, // Optimizes file size for uploads
+        maxHeight: 1080,
+        maxWidth: 1920,
       );
 
       if (pickedFile != null) {
