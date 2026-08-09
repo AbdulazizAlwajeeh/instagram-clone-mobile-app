@@ -1,3 +1,4 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get_it/get_it.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -16,6 +17,14 @@ import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:yemengram/features/profile/domain/usecases/follow_user.dart';
 import 'package:yemengram/features/profile/domain/usecases/unfollow_user.dart';
 import 'core/app_user/presentation/cubit/current_user_cubit.dart';
+import 'core/notifications/data/datasources/notification_local_data_source.dart';
+import 'core/notifications/data/datasources/notification_local_data_source_impl.dart';
+import 'core/notifications/data/datasources/notification_remote_data_source.dart';
+import 'core/notifications/data/datasources/notification_remote_data_source_impl.dart';
+import 'core/notifications/data/repositories/notification_repository_impl.dart';
+import 'core/notifications/domain/repositories/notification_repository.dart';
+import 'core/notifications/domain/usecases/register_device_token.dart';
+import 'core/notifications/domain/usecases/unregister_device_token.dart';
 import 'core/posts/data/datasoucres/post_detail_remote_data_source.dart';
 import 'core/posts/data/datasoucres/post_detail_remote_data_source_impl.dart';
 import 'core/posts/data/repositories/post_detail_repository_impl.dart';
@@ -72,6 +81,8 @@ import 'features/profile/presentation/bloc/profile_bloc.dart';
 final serviceLocator = GetIt.instance;
 
 Future<void> initDependencies() async {
+  serviceLocator.registerLazySingleton(() => FirebaseMessaging.instance);
+
   // Initialize local key-value storage engine synchronously
   final sharedPreferences = await SharedPreferences.getInstance();
   serviceLocator.registerSingleton<SharedPreferences>(sharedPreferences);
@@ -93,6 +104,9 @@ Future<void> initDependencies() async {
 
   // Initialize Core Theme engine dependencies
   _initTheme();
+
+  // Initialize Core Notification dependencies first so AuthBloc can consume them
+  _initNotifications();
 
   // Initialize Auth Feature dependencies
   _initAuth();
@@ -154,6 +168,8 @@ void _initAuth() {
         getCurrentUser: serviceLocator(),
         userSignOut: serviceLocator(),
         currentUserCubit: serviceLocator(),
+        registerDeviceToken: serviceLocator(),
+        unregisterDeviceToken: serviceLocator(),
       ),
     );
 }
@@ -348,4 +364,26 @@ void _initChat() {
       getOrCreateChat: serviceLocator<GetOrCreateChat>(),
     ),
   );
+}
+
+void _initNotifications() {
+  serviceLocator
+    // Data Sources
+    ..registerLazySingleton<NotificationLocalDataSource>(
+      () =>
+          NotificationLocalDataSourceImpl(serviceLocator<FirebaseMessaging>()),
+    )
+    ..registerLazySingleton<NotificationRemoteDataSource>(
+      () => NotificationRemoteDataSourceImpl(serviceLocator<SupabaseClient>()),
+    )
+    // Repository
+    ..registerLazySingleton<NotificationRepository>(
+      () => NotificationRepositoryImpl(
+        localDataSource: serviceLocator(),
+        remoteDataSource: serviceLocator(),
+      ),
+    )
+    // Use Cases
+    ..registerFactory(() => RegisterDeviceToken(serviceLocator()))
+    ..registerFactory(() => UnregisterDeviceToken(serviceLocator()));
 }
