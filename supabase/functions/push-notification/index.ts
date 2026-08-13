@@ -5,10 +5,14 @@ Deno.serve(async (req) => {
   console.log("--- Edge Function Execution Initiated ---")
 
   // --- SAFETY NET 1: Parsing Request Payload ---
-  let record: any
+  let record: any;
+  let sender_name: string;
+
   try {
     const body = await req.json()
-    record = body.record
+
+    record = body.record;
+    sender_name = body.sender_name;
     console.log(`[PASS] Payload read successfully`)
   } catch (err) {
     console.error("[CRITICAL CRASH] Block 1 (Payload Parse Failed): Invalid JSON structure.")
@@ -108,7 +112,7 @@ Deno.serve(async (req) => {
         body: JSON.stringify({
           message: {
             token: item.device_token,
-            notification: { title: "New Message", body: record.content },
+            notification: { title: `New Message from: ${sender_name}`, body: record.content },
             data: { conversation_id: String(record.conversation_id) }
           }
         })
