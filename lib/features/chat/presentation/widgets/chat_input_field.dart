@@ -28,6 +28,9 @@ class ChatInputField extends StatelessWidget {
             Expanded(
               child: TextField(
                 controller: controller,
+                minLines: 1,
+                maxLines: 4,
+                keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
                   hintText: "Message...",
                   contentPadding: const EdgeInsets.symmetric(
@@ -42,9 +45,6 @@ class ChatInputField extends StatelessWidget {
                   // Note: .surfaceContainerHigh is available in Flutter 3.13+
                   fillColor: Theme.of(context).colorScheme.surfaceContainerHigh,
                 ),
-                textInputAction: TextInputAction.send,
-                // Triggers structural callback updates directly when keyboard enter triggers fire
-                onSubmitted: (_) => onSendPressed(),
               ),
             ),
             const SizedBox(width: 8),
