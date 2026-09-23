@@ -74,10 +74,16 @@ class _SignUpPageState extends State<SignUpPage> {
                   ),
                 );
               }
-              if (state is AuthSuccess) {
+              if (state is SignUpSuccess) {
                 // Intercepts registration completion states to notify users of verification steps.
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Now confirm your email!')),
+                  SnackBar(
+                    content: Text(
+                      'An email has been sent to confirm '
+                      'your account'
+                      '!',
+                    ),
+                  ),
                 );
               }
             },
