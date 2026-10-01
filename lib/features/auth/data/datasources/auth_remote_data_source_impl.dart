@@ -20,49 +20,41 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String username,
   }) async {
-    try {
-      // 1. Call our dedicated RPC function to safely check availability without table access.
-      final bool isAvailable = await supabaseClient.rpc(
-        'check_username_available',
-        params: {'requested_username': username.trim()},
-      );
+    // 1. Call our dedicated RPC function to safely check availability without table access.
+    final bool isAvailable = await supabaseClient.rpc(
+      'check_username_available',
+      params: {'requested_username': username.trim()},
+    );
 
-      if (!isAvailable) {
-        // Blocks registration routines early if username allocations conflict on database indexes.
-        throw const ServerException('This username is already taken.');
-      }
-
-      // 2. Single atomic signup call. We pass the username into the raw metadata map.
-      final response = await supabaseClient.auth.signUp(
-        email: email,
-        password: password,
-        data: {'username': username},
-      );
-
-      if (response.user == null) {
-        // Enforces checking system-level confirmations to safeguard execution tracks.
-        throw const ServerException(
-          'Sign up failed: User payload returned null.',
-        );
-      }
-
-      // 3. CHECK FOR HIDDEN EMAIL COLLISION:
-      // If the response succeeds but the identities list is completely empty,
-      // Supabase is hiding a duplicate email registration attempt.
-      if (response.user!.identities != null &&
-          response.user!.identities!.isEmpty) {
-        throw const ServerException('This email is already registered.');
-      }
-
-      // 4. Return the mapped user model if everything passes safely.
-      return AppUserModel.fromJson(response.user!.toJson());
-    } on AuthException catch (e) {
-      // Pass known auth errors straight up to the repository layer.
-      throw ServerException(e.message);
-    } catch (e) {
-      // Wrap any other low-level network or system errors safely.
-      throw ServerException(e.toString());
+    if (!isAvailable) {
+      // Blocks registration routines early if username allocations conflict on database indexes.
+      throw const AuthException('', code:'username_exists');
     }
+
+    // 2. Single atomic signup call. We pass the username into the raw metadata map.
+    final response = await supabaseClient.auth.signUp(
+      email: email,
+      password: password,
+      data: {'username': username},
+    );
+
+    if (response.user == null) {
+      // Enforces checking system-level confirmations to safeguard execution tracks.
+      throw const ServerException(
+        'Sign up failed: User payload returned null.',
+      );
+    }
+
+    // 3. CHECK FOR HIDDEN EMAIL COLLISION:
+    // If the response succeeds but the identities list is completely empty,
+    // Supabase is hiding a duplicate email registration attempt.
+    if (response.user!.identities != null &&
+        response.user!.identities!.isEmpty) {
+      throw const AuthException('',code:'email_exists');
+    }
+
+    // 4. Return the mapped user model if everything passes safely.
+    return AppUserModel.fromJson(response.user!.toJson());
   }
 
   @override
@@ -70,36 +62,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    try {
-      // Dispatches baseline authorization requests down to Supabase network adapters.
-      final response = await supabaseClient.auth.signInWithPassword(
-        email: email,
-        password: password,
+    // Dispatches baseline authorization requests down to Supabase network adapters.
+    final response = await supabaseClient.auth.signInWithPassword(
+      email: email,
+      password: password,
+    );
+
+    if (response.user == null) {
+      throw const ServerException(
+        'Sign in failed: Session could not be created.',
       );
-
-      if (response.user == null) {
-        throw const ServerException(
-          'Sign in failed: Session could not be created.',
-        );
-      }
-
-      // Pull the associated unique username on login from the profiles table.
-      final profileData = await supabaseClient
-          .from('profiles')
-          .select('username')
-          .eq('id', response.user!.id)
-          .single(); // Assumes clean 1:1 user-to-profile database schema architecture mapping rules.
-
-      return AppUserModel.fromJson({
-        'id': response.user!.id,
-        'email': response.user!.email ?? '',
-        'username': profileData['username'] ?? '',
-      });
-    } on AuthException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
     }
+
+    // Pull the associated unique username on login from the profiles table.
+    final profileData = await supabaseClient
+        .from('profiles')
+        .select('username')
+        .eq('id', response.user!.id)
+        .single(); // Assumes clean 1:1 user-to-profile database schema architecture mapping rules.
+
+    return AppUserModel.fromJson({
+      'id': response.user!.id,
+      'email': response.user!.email ?? '',
+      'username': profileData['username'] ?? '',
+    });
   }
 
   @override

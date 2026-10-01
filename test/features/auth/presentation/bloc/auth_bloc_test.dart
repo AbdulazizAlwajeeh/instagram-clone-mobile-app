@@ -133,6 +133,9 @@ void main() {
         when(
           () => mockUserSignIn(any()),
         ).thenAnswer((_) async => const Right(tAppUser));
+        when(
+          () => mockRegisterDeviceToken(any()),
+        ).thenAnswer((_) async => const Right(unit));
         return authBloc;
       },
       act: (bloc) =>
@@ -211,6 +214,9 @@ void main() {
         when(
           () => mockUserSignOut(any()),
         ).thenAnswer((_) async => const Right(null));
+        when(
+          () => mockUnregisterDeviceToken(any()),
+        ).thenAnswer((_) async => const Right(unit));
         return authBloc;
       },
       act: (bloc) => bloc.add(AuthSignOut()),
@@ -226,6 +232,9 @@ void main() {
         when(() => mockUserSignOut(any())).thenAnswer(
           (_) async => const Left(failure.ServerFailure(tErrorMessage)),
         );
+        when(
+          () => mockUnregisterDeviceToken(any()),
+        ).thenAnswer((_) async => const Right(unit));
         return authBloc;
       },
       act: (bloc) => bloc.add(AuthSignOut()),

@@ -1,7 +1,9 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/app_user/domain/entities/app_user.dart';
+import '../../domain/failures/auth_failures.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
 
@@ -32,9 +34,22 @@ class AuthRepositoryImpl implements AuthRepository {
       return right(
         userModel,
       ); // Packages success frames into functional right-hand channels.
-    } on ServerException catch (e) {
-      // Intercepts explicit backend-driven failure criteria flags cleanly.
-      return left(AuthFailure(e.message));
+    } on AuthException catch (e) {
+      // Switch directly on Supabase error codes to return specific domain
+      // failures
+      switch (e.code) {
+        case 'username_exists':
+          return left(const UsernameAlreadyInUseFailure());
+        case 'email_exists':
+          return left(const EmailAlreadyInUseFailure());
+        case 'weak_password':
+          return left(const WeakPasswordFailure());
+        case 'network_error':
+          return left(const AuthNetworkFailure());
+        default:
+          // Fallback to the generic concrete AuthFailure if the code doesn't match any specific case
+          return left(AuthFailure(e.message));
+      }
     } catch (e) {
       // Catches unpredictable runtime processing blocks to isolate domain rules.
       return left(ServerFailure(e.toString()));
@@ -53,8 +68,15 @@ class AuthRepositoryImpl implements AuthRepository {
         password: password,
       );
       return right(userModel);
-    } on ServerException catch (e) {
-      return left(AuthFailure(e.message));
+    } on AuthException catch (e) {
+      switch (e.code) {
+        case 'invalid_credentials':
+          return left(const InvalidCredentialsFailure());
+        case 'network_error':
+          return left(const AuthNetworkFailure());
+        default:
+          return left(AuthFailure(e.message));
+      }
     } catch (e) {
       return left(ServerFailure(e.toString()));
     }

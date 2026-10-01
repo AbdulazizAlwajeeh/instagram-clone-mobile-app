@@ -60,7 +60,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       ),
     );
 
-    result.fold((failure) => emit(AuthFailure(failure.message)), (user) {
+    result.fold((failure) => emit(AuthFailure(failure)), (user) {
       emit(
         SignUpSuccess(),
       ); // Signals presentation widgets to show verification or advance forms.
@@ -75,7 +75,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       SignInParams(email: event.email, password: event.password),
     );
 
-    await result.fold((failure) async => emit(AuthFailure(failure.message)), (
+    await result.fold((failure) async => emit(AuthFailure(failure)), (
       user,
     ) async {
       // Hydrates the long-running application-wide session scope tracker.
@@ -98,7 +98,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result = await _getCurrentUser(NoParams());
 
-    result.fold((failure) => emit(AuthFailure(failure.message)), (user) {
+    result.fold((failure) => emit(AuthFailure(failure)), (user) {
       if (user == null) {
         _currentUserCubit
             .clearUser(); // Evicts stale user records if the session verification check returns empty.
@@ -123,7 +123,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = await _userSignOut(NoParams());
 
     result.fold(
-      (failure) => emit(AuthFailure(failure.message)),
+      (failure) => emit(AuthFailure(failure)),
       (_) {
         _currentUserCubit
             .clearUser(); // Flushes long-running memory state variables.

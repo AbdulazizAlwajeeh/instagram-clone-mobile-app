@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../../core/app_user/domain/entities/app_user.dart';
+import '../../../../core/error/failures.dart';
 
 /// Base state class governing the active application authentication status.
 ///
@@ -39,11 +40,12 @@ class SignUpSuccess extends AuthState {}
 
 /// Emitted when an operational authorization sequence breaks down or encounters validation blocks.
 ///
-/// Captures readable troubleshooting strings to let presentation layers display user-facing alerts.
+/// Encapsulates a strongly-typed domain [Failure] object, allowing presentation layer utilities
+/// to dynamically map the error into localized, user-facing UI messages.
 class AuthFailure extends AuthState {
-  /// The descriptive error message outlining the authentication fault.
-  final String message;
+  /// The underlying domain failure outlining the specific authentication fault.
+  final Failure failure;
 
-  /// Creates a detailed authentication failure barrier carrying raw message details.
-  const AuthFailure(this.message);
+  /// Creates an authentication failure state carrying an explicit domain [failure] object.
+  const AuthFailure(this.failure);
 }

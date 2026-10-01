@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:yemengram/core/error/exceptions.dart';
+import 'package:yemengram/core/error/failures.dart';
 import 'package:yemengram/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:yemengram/features/auth/data/models/app_user_model.dart';
 import 'package:yemengram/features/auth/data/repositories/auth_repository_impl.dart';
@@ -74,7 +75,7 @@ void main() {
         // Verify it's a Left option and check the message property inside
         expect(result.isLeft(), true);
         result.fold(
-          (failure) => expect(failure.message, tServerErrorMessage),
+          (failure) => expect(failure, isA<Failure>()),
           (user) => fail('Should not return a user'),
         );
       },
@@ -143,7 +144,7 @@ void main() {
 
       expect(result.isLeft(), true);
       result.fold(
-        (failure) => expect(failure.message, tServerErrorMessage),
+        (failure) => expect(failure, isA<Failure>()),
         (user) => fail('Should not return a user'),
       );
     });

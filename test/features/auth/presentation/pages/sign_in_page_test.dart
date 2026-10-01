@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:yemengram/features/auth/domain/failures/auth_failures.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_event.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_state.dart';
@@ -134,7 +135,7 @@ void main() {
           mockAuthBloc,
           Stream.fromIterable([
             AuthInitial(),
-            const AuthFailure('Invalid password'),
+            const AuthFailure(InvalidCredentialsFailure()),
           ]),
           initialState: AuthInitial(),
         );
@@ -143,7 +144,7 @@ void main() {
         await tester.pump(); // Trigger the listener state handling frame
 
         expect(find.byType(SnackBar), findsOneWidget);
-        expect(find.text('Invalid password'), findsOneWidget);
+        expect(find.text('Incorrect email/password.'), findsOneWidget);
       },
     );
   });

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:yemengram/core/app_user/domain/entities/app_user.dart';
+import 'package:yemengram/features/auth/domain/failures/auth_failures.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_event.dart';
 import 'package:yemengram/features/auth/presentation/bloc/auth_state.dart';
@@ -152,7 +152,7 @@ void main() {
           mockAuthBloc,
           Stream.fromIterable([
             AuthInitial(),
-            const AuthFailure('Email already exists'),
+            const AuthFailure(EmailAlreadyInUseFailure()),
           ]),
           initialState: AuthInitial(),
         );
@@ -161,21 +161,16 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(SnackBar), findsOneWidget);
-        expect(find.text('Email already exists'), findsOneWidget);
+        expect(find.text('This email is already reserved.'), findsOneWidget);
       },
     );
 
     testWidgets(
       'should display confirmation message snackbar when AuthSuccess is emitted',
       (WidgetTester tester) async {
-        const tUser = AppUser(
-          id: '1',
-          email: 'alex@e.com',
-          username: 'alex_dev',
-        );
         whenListen(
           mockAuthBloc,
-          Stream.fromIterable([AuthInitial(), const AuthSuccess(tUser)]),
+          Stream.fromIterable([AuthInitial(), SignUpSuccess()]),
           initialState: AuthInitial(),
         );
 
@@ -183,7 +178,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(SnackBar), findsOneWidget);
-        expect(find.text('Now confirm your email!'), findsOneWidget);
+        expect(find.text('An email has been sent to confirm your account!'), findsOneWidget);
       },
     );
   });

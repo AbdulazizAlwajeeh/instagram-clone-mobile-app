@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/features/auth/presentation/utils/auth_failure_messages.dart';
 import 'package:yemengram/features/auth/presentation/widgets/auth_header.dart';
 import '../../../../core/router/app_router.dart';
 import '../bloc/auth_bloc.dart';
@@ -64,7 +65,7 @@ class _SignInPageState extends State<SignInPage> {
                 // Intercepts processing boundaries errors to alert user interaction channels.
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.message),
+                    content: Text(state.failure.toUserMessage()),
                     backgroundColor: Colors.red,
                   ),
                 );
