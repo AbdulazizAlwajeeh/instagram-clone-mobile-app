@@ -17,6 +17,11 @@ import 'package:yemengram/features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:yemengram/features/profile/domain/usecases/follow_user.dart';
 import 'package:yemengram/features/profile/domain/usecases/unfollow_user.dart';
 import 'core/app_user/presentation/cubit/current_user_cubit.dart';
+import 'core/localization/data/datasources/locale_local_data_source_impl.dart';
+import 'core/localization/data/datasources/locale_local_datasource.dart';
+import 'core/localization/data/repositories/locale_repository_impl.dart';
+import 'core/localization/domain/repositories/locale_repository.dart';
+import 'core/localization/presentation/cubits/locale_cubit.dart';
 import 'core/notifications/data/datasources/notification_local_data_source.dart';
 import 'core/notifications/data/datasources/notification_local_data_source_impl.dart';
 import 'core/notifications/data/datasources/notification_remote_data_source.dart';
@@ -122,6 +127,8 @@ Future<void> initDependencies() async {
   _initExplore();
 
   _initChat();
+
+  _initLocalization();
 
   // Register Global Core Router Singleton
   serviceLocator.registerSingleton<AppRouter>(
@@ -386,4 +393,18 @@ void _initNotifications() {
     // Use Cases
     ..registerFactory(() => RegisterDeviceToken(serviceLocator()))
     ..registerFactory(() => UnregisterDeviceToken(serviceLocator()));
+}
+
+void _initLocalization() {
+  serviceLocator
+    // Data Sources
+    ..registerLazySingleton<LocaleLocalDataSource>(
+      () => LocaleLocalDataSourceImpl(serviceLocator<SharedPreferences>()),
+    )
+    // Repository
+    ..registerLazySingleton<LocaleRepository>(
+      () => LocaleRepositoryImpl(localDataSource: serviceLocator()),
+    )
+    // Cubit
+    ..registerFactory(() => LocaleCubit(serviceLocator()));
 }

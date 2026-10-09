@@ -8,9 +8,11 @@ import 'package:yemengram/core/theme/app_theme.dart';
 import 'package:yemengram/core/theme/presentation/bloc/theme_state.dart';
 import 'package:yemengram/init_dependencies.dart';
 import 'core/app_user/presentation/cubit/current_user_cubit.dart';
+import 'core/localization/presentation/cubits/locale_cubit.dart';
 import 'core/theme/presentation/bloc/theme_bloc.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
+import 'package:yemengram/core/localization/generated/app_localizations.dart';
 
 // This annotation ensures the Flutter compiler does not delete this function
 // during production builds, allowing the native Android system to find it.
@@ -67,14 +69,21 @@ class MyApp extends StatelessWidget {
           create: (_) => serviceLocator<CurrentUserCubit>(),
         ),
         BlocProvider<ThemeBloc>(create: (_) => serviceLocator<ThemeBloc>()),
+        BlocProvider<LocaleCubit>(create: (_) => serviceLocator<LocaleCubit>()),
         BlocProvider<AuthBloc>(
           create: (_) => serviceLocator<AuthBloc>()..add(AuthCheckSession()),
         ),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
         builder: (context, state) {
+          final currentLocale = context.select(
+            (LocaleCubit cubit) => cubit.state,
+          );
           return MaterialApp.router(
             title: 'Instagram Clone',
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            locale: currentLocale,
+            supportedLocales: AppLocalizations.supportedLocales,
             debugShowCheckedModeBanner: false,
             theme: AppTheme.lightTheme,
             darkTheme: AppTheme.darkTheme,

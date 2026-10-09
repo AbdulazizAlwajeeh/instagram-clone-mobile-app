@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:yemengram/core/router/app_router.dart';
 import 'package:yemengram/features/auth/presentation/utils/auth_failure_messages.dart';
 import 'package:yemengram/features/auth/presentation/widgets/auth_header.dart';
+import '../../../../core/localization/presentation/cubits/locale_cubit.dart';
+import '../../../../core/localization/presentation/widgets/language_dropdown_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -59,7 +61,26 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    final currentLocale = context.select((LocaleCubit cubit) => cubit.state);
+
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: LanguageDropdownButton(
+              currentLocale: currentLocale,
+              onLocaleChanged: (Locale newLocale) {
+                context.read<LocaleCubit>().changeLocale(newLocale);
+              },
+            ),
+          ),
+        ],
+      ),
+      extendBodyBehindAppBar: true, // Prevents the appbar from pushing the
+      // center layout down
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),

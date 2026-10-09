@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/localization/presentation/cubits/locale_cubit.dart';
+import '../../../../core/localization/presentation/widgets/language_dropdown_button.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/presentation/bloc/theme_bloc.dart';
 import '../../../../core/theme/presentation/bloc/theme_event.dart';
@@ -16,6 +18,8 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentLocale = context.select((LocaleCubit cubit) => cubit.state);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Settings'), centerTitle: true),
       body: SafeArea(
@@ -54,6 +58,28 @@ class SettingsPage extends StatelessWidget {
                       context.read<ThemeBloc>().add(
                         const ThemeToggleRequested(),
                       );
+                    },
+                  ),
+                ),
+              ),
+              Card(
+                elevation: 0,
+                color: context.theme.colorScheme.surface,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(
+                    AppDimensions.borderRadiusMd,
+                  ),
+                ),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.translate,
+                    color: context.theme.colorScheme.primary,
+                  ),
+                  title: Text("Language", style: context.textTheme.bodyLarge),
+                  trailing: LanguageDropdownButton(
+                    currentLocale: currentLocale,
+                    onLocaleChanged: (Locale newLocale) {
+                      context.read<LocaleCubit>().changeLocale(newLocale);
                     },
                   ),
                 ),
