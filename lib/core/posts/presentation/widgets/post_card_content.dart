@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../theme/app_dimensions.dart';
 import '../../../theme/theme_extensions.dart';
 
@@ -37,7 +38,7 @@ class PostCardContent extends StatelessWidget {
         children: [
           // 1. Social Engagement Metric Total Display
           Text(
-            '$likesCount likes',
+            '$likesCount ${context.l10n.likesCounter}',
             style: context.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
             ),

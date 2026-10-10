@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import 'package:yemengram/core/router/app_router.dart';
 import 'package:yemengram/features/create_post/presentation/widgets/caption_input_field.dart';
 import 'package:yemengram/features/create_post/presentation/widgets/image_source_picker.dart';
@@ -95,7 +96,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         }
         if (state is CreatePostSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Post published successfully! 🎉')),
+            SnackBar(content: Text(context.l10n.publishPostSuccessMessage)),
           );
           _resetAndPop();
         }
@@ -104,7 +105,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
         return Scaffold(
           appBar: AppBar(
             title: Text(
-              'New Post',
+              context.l10n.publishPostPageTitle,
               style: context.textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.bold,
               ),
@@ -133,7 +134,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         _onPublishPressed(state);
                       },
                       child: Text(
-                        'Publish',
+                        context.l10n.publishPostButton,
                         style: context.textTheme.labelLarge?.copyWith(
                           color: context.colorScheme.primary,
                           fontWeight: FontWeight.bold,

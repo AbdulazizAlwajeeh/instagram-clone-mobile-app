@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import 'package:yemengram/core/router/app_router.dart';
 import 'package:yemengram/features/auth/presentation/utils/auth_failure_messages.dart';
 import 'package:yemengram/features/auth/presentation/widgets/auth_header.dart';
@@ -91,7 +92,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 // Intercepts processing boundaries errors to alert user interaction channels.
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(state.failure.toUserMessage()),
+                    content: Text(state.failure.toUserMessage(context)),
                     backgroundColor: Colors.red,
                   ),
                 );
@@ -124,7 +125,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     const SizedBox(height: 40),
                     AuthTextField(
                       controller: _usernameController,
-                      labelText: 'Username',
+                      labelText: context.l10n.usernameTextFieldHint,
                       keyboardType: TextInputType.text,
                       enabled: !isLoading,
                       validator: (value) =>
@@ -135,7 +136,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     const SizedBox(height: 16),
                     AuthTextField(
                       controller: _emailController,
-                      labelText: 'Email',
+                      labelText: context.l10n.emailTextFieldHint,
                       keyboardType: TextInputType.emailAddress,
                       enabled: !isLoading,
                       validator: (value) =>
@@ -146,7 +147,7 @@ class _SignUpPageState extends State<SignUpPage> {
                     const SizedBox(height: 16),
                     AuthTextField(
                       controller: _passwordController,
-                      labelText: 'Password',
+                      labelText: context.l10n.passwordTextFieldHint,
                       obscureText: true,
                       enabled: !isLoading,
                       validator: (value) => (value == null || value.length < 6)
@@ -155,8 +156,8 @@ class _SignUpPageState extends State<SignUpPage> {
                     ),
                     const SizedBox(height: 24),
                     AuthActionBlock(
-                      primaryButtonText: 'Sign Up',
-                      secondaryButtonText: 'Already have an account? Log In',
+                      primaryButtonText: context.l10n.signupButton,
+                      secondaryButtonText: context.l10n.loginPageLink,
                       isLoading: isLoading,
                       onPrimaryPressed: _handleSignUp,
                       onSecondaryPressed: () {

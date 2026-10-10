@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import 'package:yemengram/core/router/app_router.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
@@ -32,7 +33,7 @@ class ExplorePage extends StatelessWidget {
               padding: const EdgeInsets.all(AppDimensions.sm),
               child: TextField(
                 decoration: InputDecoration(
-                  hintText: 'Search',
+                  hintText: context.l10n.searchTextFieldHint,
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: blockSurfaceColor,

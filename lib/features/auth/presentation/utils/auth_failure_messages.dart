@@ -1,20 +1,22 @@
+import 'package:flutter/cupertino.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../domain/failures/auth_failures.dart';
 
 extension AuthFailureMessage on Failure {
   /// Transforms strongly-typed domain failures into human-readable UI strings.
-  String toUserMessage() {
+  String toUserMessage(BuildContext context) {
     return switch (this) {
       // Handle specific authentication failure classes
       InvalidCredentialsFailure() =>
-        'Incorrect email/password.',
+        context.l10n.invalidCredentialsErrorMessage,
 
       EmailAlreadyInUseFailure() =>
-        'This email is either already reserved or needs confirmation, check '
-            'your inbox.',
+        context.l10n.emailAlreadyUsedErrorMessage,
 
       UsernameAlreadyInUseFailure() =>
-        'This username is already reserved.',
+        context.l10n.usernameAlreadyUsedErrorMessage,
 
       WeakPasswordFailure() =>
         'This password is too weak.',

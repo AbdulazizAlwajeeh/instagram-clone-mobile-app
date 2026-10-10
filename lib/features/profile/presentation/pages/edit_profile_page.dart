@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import 'package:yemengram/core/theme/app_dimensions.dart';
 import 'package:yemengram/core/theme/theme_extensions.dart';
 import 'package:yemengram/features/profile/domain/entities/user_profile.dart';
@@ -96,7 +97,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile', style: context.textTheme.titleLarge),
+        title: Text(
+          context.l10n.editProfilePageTitle,
+          style: context.textTheme.titleLarge,
+        ),
       ),
       body: BlocConsumer<EditProfileBloc, EditProfileState>(
         listener: (context, state) {
@@ -138,7 +142,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // --- FULL NAME FIELD ---
                   ProfileTextField(
                     controller: _fullNameController,
-                    labelText: 'Full Name',
+                    labelText: context.l10n.fullNameTextFieldHint,
                     prefixIcon: Icons.person_outline,
                   ),
                   const SizedBox(height: AppDimensions.md),
@@ -146,7 +150,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // --- USERNAME FIELD ---
                   ProfileTextField(
                     controller: _usernameController,
-                    labelText: 'Username',
+                    labelText: context.l10n.editUsernameTextFieldLabel,
                     prefixIcon: Icons.alternate_email,
                     onChanged: (value) {
                       context.read<EditProfileBloc>().add(
@@ -155,7 +159,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     },
                     suffixIcon: _buildUsernameSuffixIcon(state),
                     errorText: state is EditProfileUsernameTaken
-                        ? 'This username is already taken'
+                        ? context.l10n.editUsernameErrorMessage
                         : null,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -172,7 +176,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   // --- BIO FIELD ---
                   ProfileTextField(
                     controller: _bioController,
-                    labelText: 'Bio',
+                    labelText: context.l10n.bioTextFieldHint,
                     prefixIcon: Icons.description_outlined,
                     maxLines: 4,
                     maxLength: 150,

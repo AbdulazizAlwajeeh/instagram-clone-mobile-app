@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
 
@@ -46,7 +47,7 @@ class CaptionInputField extends StatelessWidget {
               minLines: 1,
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
-                hintText: 'Write a caption...',
+                hintText: context.l10n.postCaptionTextFieldHint,
                 hintStyle: context.textTheme.bodyMedium?.copyWith(
                   color: context.colorScheme.onSurfaceVariant.withValues(
                     alpha: 0.6,

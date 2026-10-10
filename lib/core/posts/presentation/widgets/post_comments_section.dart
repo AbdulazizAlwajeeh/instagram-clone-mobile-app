@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../theme/app_dimensions.dart';
 import '../../../theme/theme_extensions.dart';
 
@@ -31,7 +32,7 @@ class PostCommentSection extends StatelessWidget {
         ),
         // Interactive label showcasing real-time comment metrics
         child: Text(
-          'View all $commentsCount comments',
+          context.l10n.commentsLink(commentsCount),
           style: context.textTheme.bodyMedium?.copyWith(
             color: context.colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
 
 class ProfileStats extends StatelessWidget {
@@ -18,9 +19,18 @@ class ProfileStats extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _StatItem(count: postsCount.toString(), label: 'Posts'),
-        _StatItem(count: followersCount.toString(), label: 'Followers'),
-        _StatItem(count: followingCount.toString(), label: 'Following'),
+        _StatItem(
+          count: postsCount.toString(),
+          label: context.l10n.profilePostsCounter,
+        ),
+        _StatItem(
+          count: followersCount.toString(),
+          label: context.l10n.profileFollowersCounter,
+        ),
+        _StatItem(
+          count: followingCount.toString(),
+          label: context.l10n.profileFollowingCounter,
+        ),
       ],
     );
   }

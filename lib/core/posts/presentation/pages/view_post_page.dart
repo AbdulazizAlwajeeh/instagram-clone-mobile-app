@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import 'package:yemengram/core/theme/theme_extensions.dart';
 import '../../../../core/posts/presentation/widgets/post_card.dart';
 import '../../domain/entities/comment.dart';
@@ -46,8 +47,8 @@ class ViewPostPage extends StatelessWidget {
             // If the post was successfully reported, notify user and pop out of the screen
             if (postEntity.reportedByMe) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Post successfully reported.'),
+                SnackBar(
+                  content: Text(context.l10n.reportPostSuccessMessage),
                   backgroundColor: Colors.green,
                 ),
               );
@@ -58,7 +59,10 @@ class ViewPostPage extends StatelessWidget {
         }
       },
       child: Scaffold(
-        appBar: AppBar(title: const Text('Post'), centerTitle: true),
+        appBar: AppBar(
+          title: Text(context.l10n.singlePostTitle),
+          centerTitle: true,
+        ),
         body: RefreshIndicator(
           onRefresh: () async {
             bloc.add(PostDetailRefreshRequested(postId: postId));
@@ -134,7 +138,7 @@ class ViewPostPage extends StatelessWidget {
                           options: [
                             // Option 1: Report Post
                             PostOptionItem(
-                              title: 'Report Post',
+                              title: context.l10n.reportPostOption,
                               icon: Icons.report_problem_outlined,
                               color: context.colorScheme.error,
                               isEnabled: !hasBeenReported,

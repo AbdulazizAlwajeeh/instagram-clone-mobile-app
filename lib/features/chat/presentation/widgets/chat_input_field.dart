@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 
 /// A presentation interface component providing interactive message text composition utilities.
 ///
@@ -32,7 +33,7 @@ class ChatInputField extends StatelessWidget {
                 maxLines: 4,
                 keyboardType: TextInputType.multiline,
                 decoration: InputDecoration(
-                  hintText: "Message...",
+                  hintText: context.l10n.sendMessageTextFieldHint,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 10,

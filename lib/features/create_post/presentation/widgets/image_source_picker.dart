@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 
 /// Presentation utility helper exposing a modal interface sheet for selecting image capture channels.
 ///
@@ -23,7 +24,7 @@ class ImageSourcePicker {
             children: [
               ListTile(
                 leading: const Icon(Icons.photo_library_outlined),
-                title: const Text('Choose from Gallery'),
+                title: Text(context.l10n.chooseFromGalleryOption),
                 onTap: () {
                   Navigator.pop(context);
                   onSourceSelected(ImageSource.gallery);
@@ -31,7 +32,7 @@ class ImageSourcePicker {
               ),
               ListTile(
                 leading: const Icon(Icons.camera_alt_outlined),
-                title: const Text('Take a Photo'),
+                title: Text(context.l10n.takeAPhotoOption),
                 onTap: () {
                   Navigator.pop(context);
                   onSourceSelected(ImageSource.camera);

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
 
@@ -50,7 +51,7 @@ class MediaPickerPlaceholder extends StatelessWidget {
                     ),
                     const SizedBox(height: AppDimensions.xs),
                     Text(
-                      'Tap to upload photos or videos',
+                      context.l10n.chooseImageOptionsButton,
                       style: context.textTheme.labelMedium?.copyWith(
                         color: context.colorScheme.onSurfaceVariant.withValues(
                           alpha: 0.6,

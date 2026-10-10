@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../../core/localization/presentation/cubits/locale_cubit.dart';
 import '../../../../core/localization/presentation/widgets/language_dropdown_button.dart';
 import '../../../../core/theme/app_dimensions.dart';
@@ -21,7 +22,10 @@ class SettingsPage extends StatelessWidget {
     final currentLocale = context.select((LocaleCubit cubit) => cubit.state);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Settings'), centerTitle: true),
+      appBar: AppBar(
+        title: Text(context.l10n.settingsPageTitle),
+        centerTitle: true,
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppDimensions.md),
@@ -30,7 +34,7 @@ class SettingsPage extends StatelessWidget {
             children: [
               // --- Section: Preferences ---
               Text(
-                'Preferences',
+                context.l10n.preferencesTitle,
                 style: context.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
@@ -51,7 +55,10 @@ class SettingsPage extends StatelessWidget {
                     Icons.dark_mode_outlined,
                     color: context.theme.colorScheme.primary,
                   ),
-                  title: Text('Dark Theme', style: context.textTheme.bodyLarge),
+                  title: Text(
+                    context.l10n.darkThemeOption,
+                    style: context.textTheme.bodyLarge,
+                  ),
                   trailing: Switch.adaptive(
                     value: context.theme.brightness == Brightness.dark,
                     onChanged: (bool value) {
@@ -75,7 +82,10 @@ class SettingsPage extends StatelessWidget {
                     Icons.translate,
                     color: context.theme.colorScheme.primary,
                   ),
-                  title: Text("Language", style: context.textTheme.bodyLarge),
+                  title: Text(
+                    context.l10n.languageOption,
+                    style: context.textTheme.bodyLarge,
+                  ),
                   trailing: LanguageDropdownButton(
                     currentLocale: currentLocale,
                     onLocaleChanged: (Locale newLocale) {
@@ -89,7 +99,7 @@ class SettingsPage extends StatelessWidget {
 
               // --- Section: Account ---
               Text(
-                'Account Actions',
+                context.l10n.accountActionsTitle,
                 style: context.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1.2,
@@ -112,8 +122,8 @@ class SettingsPage extends StatelessWidget {
                     color: Colors
                         .redAccent, // Intentional constant semantic alert override
                   ),
-                  title: const Text(
-                    'Sign Out',
+                  title: Text(
+                    context.l10n.signOutOption,
                     style: TextStyle(
                       color: Colors.redAccent,
                       fontWeight: FontWeight.w600,
@@ -137,15 +147,13 @@ class SettingsPage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text(
-          'Are you sure you want to log out of your account?',
-        ),
+        title: Text(context.l10n.signOutConfirmationTitle),
+        content: Text(context.l10n.signOutConfirmationDescription),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(),
             child: Text(
-              'Cancel',
+              context.l10n.cancelButton,
               style: TextStyle(
                 color: context.theme.colorScheme.onSurfaceVariant,
               ),
@@ -157,8 +165,8 @@ class SettingsPage extends StatelessWidget {
               // Dispatches global sign-out action across the current structure
               context.read<AuthBloc>().add(AuthSignOut());
             },
-            child: const Text(
-              'Sign Out',
+            child: Text(
+              context.l10n.signOutConfirmationButton,
               style: TextStyle(
                 color: Colors.redAccent,
                 fontWeight: FontWeight.bold,

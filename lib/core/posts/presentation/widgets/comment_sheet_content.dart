@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../theme/app_dimensions.dart';
 import '../../../theme/theme_extensions.dart';
 import '../../domain/entities/comment.dart';
@@ -84,7 +85,7 @@ class _CommentSheetContentState extends State<CommentSheetContent> {
                 ),
                 const SizedBox(height: AppDimensions.sm),
                 Text(
-                  'Comments',
+                  context.l10n.commentsSheetTitle,
                   style: context.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
@@ -140,8 +141,8 @@ class _CommentSheetContentState extends State<CommentSheetContent> {
                         Expanded(
                           child: TextField(
                             controller: _textController,
-                            decoration: const InputDecoration(
-                              hintText: 'Add a comment...',
+                            decoration: InputDecoration(
+                              hintText: context.l10n.commentTextFieldHint,
                               border: InputBorder.none,
                             ),
                           ),
@@ -156,7 +157,7 @@ class _CommentSheetContentState extends State<CommentSheetContent> {
                               FocusScope.of(context).unfocus();
                             }
                           },
-                          child: const Text('Post'),
+                          child: Text(context.l10n.publishCommentButton),
                         ),
                       ],
                     ),

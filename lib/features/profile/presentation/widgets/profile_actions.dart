@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../../core/theme/app_dimensions.dart';
 import '../../../../core/theme/theme_extensions.dart';
 
@@ -23,7 +24,10 @@ class ProfileActions extends StatelessWidget {
     return Row(
       children: [
         if (isMe) ...[
-          _ActionButton(label: 'Edit Profile', onPressed: onEditPressed),
+          _ActionButton(
+            label: context.l10n.editProfileButton,
+            onPressed: onEditPressed,
+          ),
           const SizedBox(width: AppDimensions.sm),
         ] else ...[
           _ActionButton(
