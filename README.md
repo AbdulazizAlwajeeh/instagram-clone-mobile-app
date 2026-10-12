@@ -6,6 +6,7 @@ A mobile production-grade application built with Flutter and Supabase, designed 
 
 ## 🚀 Core Features
 * **Authentication:** Secure sign-up, sign-in, and session management via Supabase Auth.
+* **Multi-Language Support:** Fully localized UI offering native language switching capabilities.
 * **Real-time Interactions:** Instant updates for chats, feeds, likes, comments, and user activities.
 * **Media Handling:** High-performance image uploads and distribution backed by Supabase Storage.
 * **Push Notifications:** Target-driven cloud messaging powered by Firebase Cloud Messaging (FCM).
@@ -16,6 +17,8 @@ A mobile production-grade application built with Flutter and Supabase, designed 
 
 <img width="180" alt="Chats" src="https://github.com/user-attachments/assets/148289ff-688c-468b-9234-a4ca84cce2ec" /> <img width="180" alt="Messages" src="https://github.com/user-attachments/assets/e770120d-b57b-4402-845d-075e6e6e839c" /> <img width="180" alt="Profile" src="https://github.com/user-attachments/assets/81c57884-ca9e-467d-90f0-fd62df37d9cd" /> <img width="180" alt="Settings" src="https://github.com/user-attachments/assets/383fc2d8-a25a-4335-a4e0-e67eea3af3ef" />
 
+
+<img width="180" alt="Language switching" src="https://github.com/user-attachments/assets/4d21ee26-a004-49d6-a9ff-be992daec077" />
 
 ---
 
@@ -40,6 +43,8 @@ The project strictly adheres to **Clean Architecture** principles decoupled into
 * **Push Notifications:** [Firebase Cloud Messaging (FCM)] - Low-latency remote push capabilities.
 * **Unit & Unit Mock Testing:** [Mocktail] - Null-safe mocking library to validate use cases and BLoC components.
 * **Functional Error Handling:** Implements the `Either` class pattern across all repositories to enforce compile-time type safety over runtime exceptions.
+* **Internationalization:** [flutter_localizations & intl] - Native multi-language support and 
+  locale-aware text formatting.
 * **Code Documentation:** Fully documented public APIs, classes, and use cases to maximize project maintainability and clean onboarding.
 
 ---
