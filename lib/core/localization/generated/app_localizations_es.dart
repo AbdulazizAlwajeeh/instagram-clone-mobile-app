@@ -170,4 +170,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get cancelButton => 'Cancelar';
+
+  @override
+  String get appName => 'InstaClone';
 }

@@ -168,4 +168,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get cancelButton => 'إلغاء';
+
+  @override
+  String get appName => 'InstaClone';
 }

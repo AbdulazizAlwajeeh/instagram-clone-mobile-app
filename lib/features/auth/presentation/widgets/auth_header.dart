@@ -6,12 +6,14 @@ import 'package:flutter/material.dart';
 /// primary welcoming logotype title layout.
 class AuthHeader extends StatelessWidget {
   /// Instantiates a stateless visual title text block.
-  const AuthHeader({super.key});
+  const AuthHeader({super.key, required this.title});
+
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    return const Text(
-      'Yemengram',
+    return Text(
+      title,
       textAlign: TextAlign.center,
       // Centers the title across horizontal canvas alignments.
       style: TextStyle(

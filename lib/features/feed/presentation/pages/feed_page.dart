@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:yemengram/core/localization/extensions/localization_extensions.dart';
 import '../../../../core/posts/presentation/widgets/comment_sheet_content.dart';
 import '../../../../core/posts/presentation/widgets/post_card.dart';
 import '../bloc/feed_bloc.dart';
@@ -54,7 +55,7 @@ class _FeedPageState extends State<FeedPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Yemengram'), centerTitle: false),
+      appBar: AppBar(title: Text(context.l10n.appName), centerTitle: false),
       body: RefreshIndicator(
         onRefresh: () async {
           _feedBloc.add(FeedRefreshRequested());
@@ -135,6 +136,7 @@ class _FeedPageState extends State<FeedPage> {
 
         return PostCard(
           post: post,
+          onMoreTapped: () {},
           onLikeTapped: () {
             _feedBloc.add(FeedPostLikeTapped(postId: post.id));
           },

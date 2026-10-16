@@ -48,5 +48,6 @@
   "signOutConfirmationTitle": "Cerrar sesión",
   "signOutConfirmationDescription": "¿Confirmas que quieres cerrar sesión en tu cuenta?",
   "signOutConfirmationButton": "Cerrar sesión",
-  "cancelButton": "Cancelar"
+  "cancelButton": "Cancelar",
+  "appName": "InstaClone"
 }

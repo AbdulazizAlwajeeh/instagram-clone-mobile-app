@@ -48,5 +48,6 @@
   "signOutConfirmationTitle": "تسجيل الخروج",
   "signOutConfirmationDescription": "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
   "signOutConfirmationButton": "خروج",
-  "cancelButton": "إلغاء"
+  "cancelButton": "إلغاء",
+  "appName": "InstaClone"
 }

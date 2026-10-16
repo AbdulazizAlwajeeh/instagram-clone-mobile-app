@@ -121,7 +121,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const AuthHeader(),
+                    AuthHeader(title: context.l10n.appName),
                     const SizedBox(height: 40),
                     AuthTextField(
                       controller: _usernameController,

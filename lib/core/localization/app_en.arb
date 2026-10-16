@@ -48,5 +48,6 @@
   "signOutConfirmationTitle": "Sign Out",
   "signOutConfirmationDescription": "Are you sure you want to log out of your account?",
   "signOutConfirmationButton": "Sign Out",
-  "cancelButton": "Cancel"
+  "cancelButton": "Cancel",
+  "appName": "InstaClone"
 }
